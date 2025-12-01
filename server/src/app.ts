@@ -6,6 +6,9 @@ import logger from "./middleware/logger";
 import { apiLimiter } from "./middleware/rateLimiter";
 import { AppError } from "./utils/AppError";
 import authRoute from './modules/auth/routes/routes'
+import schoolRoute from './modules/school/routes/school.routes'
+import classRoute from './modules/academic/routes/class.routes'
+import studentRoute from './modules/academic/routes/student.route'
 
 
 const app: Application = express();
@@ -17,6 +20,9 @@ app.use(express.json());
 app.use(logger); 
 app.use("/api", apiLimiter); 
 app.use("/api/auth",authRoute)
+app.use("/api/school",schoolRoute)
+app.use("/api/class",classRoute)
+app.use("/api/student",studentRoute)
 
 
 app.all("*", (req, res, next) => {

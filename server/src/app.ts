@@ -5,6 +5,7 @@ import errorHandler from "./middleware/errorHandler";
 import logger from "./middleware/logger";
 import { apiLimiter } from "./middleware/rateLimiter";
 import { AppError } from "./utils/AppError";
+import authRoute from './modules/auth/routes/routes'
 
 
 const app: Application = express();
@@ -15,6 +16,7 @@ app.use(cors());
 app.use(express.json());
 app.use(logger); 
 app.use("/api", apiLimiter); 
+app.use("/api/auth",authRoute)
 
 
 app.all("*", (req, res, next) => {

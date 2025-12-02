@@ -11,6 +11,7 @@ import { getInitials } from '@/src/components/parents/ParentConfig'; // Reusing 
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import ChildCareIcon from '@mui/icons-material/ChildCare';
 import { alpha } from '@mui/material/styles';
+import { toast } from 'sonner';
 
 // --- Form Definitions (Needs to be separate file in production, defined here for demo) ---
 const themeColors = { primary: '#4DB6AC', primaryDark: '#00897B', secondary: '#FF9800', sentBubble: '#4DB6AC' };
@@ -21,48 +22,51 @@ const themeColors = { primary: '#4DB6AC', primaryDark: '#00897B', secondary: '#F
 
 export default function LoginPage() {
   const router = useRouter();
-
-  // Stages: 1=Phone Input, 2=OTP Input, 3=Password Input (MFA)
+  
   const [stage, setStage] = useState(1);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [error, setError] = useState<string | null>(null);
-
-  // Data Storage
+  
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
-  const [firebaseToken, setFirebaseToken] = useState(''); // Stores token for Step 2 submission
-  const [adminRole, setAdminRole] = useState(''); // Stores role from Step 1 response
+  const [firebaseToken, setFirebaseToken] = useState(''); 
+  const [adminRole, setAdminRole] = useState(''); 
 
   const [loginApi, { isLoading }] = useLoginMutation();
 
-  // --- Recaptcha Setup (Standard) ---
   useEffect(() => {
     if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible', callback: () => { } });
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible', callback: () => {} });
     }
   }, []);
 
   // --- Server Logic ---
   const handleServerLogin = async (token: string, password?: string) => {
     setError(null);
+    
+    // 2. Show Loading Toast
+    const toastId = toast.loading('Verifying credentials...');
 
     try {
-      // 1. Send token (and password if Step 2) to backend
       const response = await loginApi({ token, stepTwoPassword: password }).unwrap();
-
-      // 2. Check for MFA requirement (Backend returns { step: 2 })
+      
+      // Check for MFA requirement
       if (response.step === 2) {
+        toast.dismiss(toastId); // Dismiss loading
         setAdminRole(response.role);
         setStage(3); // Go to Password Stage
+        toast.info('Admin Access Detected: Please enter password');
         return;
       }
 
-      // 3. Final Success (Non-admin or successful password check)
+      // Final Success
       localStorage.setItem('token', response.token as string);
       localStorage.setItem('user', JSON.stringify(response.user));
-      alert('Login Successful!');
-
-      // Redirect based on role (simple redirect logic)
+      
+      // 3. Success Toast
+      toast.success('Login Successful!', { id: toastId });
+      
+      // Redirect
       if (response.user.role.includes('SUPER_ADMIN')) {
         router.push('/admin/dashboard');
       } else if (response.user.role.includes('SCHOOL_ADMIN')) {
@@ -76,49 +80,51 @@ export default function LoginPage() {
     } catch (err: any) {
       const serverMessage = err.data?.message || 'Login failed due to network error.';
       setError(serverMessage);
+      // 4. Error Toast
+      toast.error(serverMessage, { id: toastId });
     }
   };
 
   // --- Step 1 Handlers ---
   const handleSendOtp = async (e: React.FormEvent) => {
-    e.preventDefault(); // <--- THIS STOPS THE PAGE REFRESH
-
+    e.preventDefault(); 
+    
     if (!phoneNumber || phoneNumber.length !== 10) {
-      setError("Please enter a valid 10-digit number");
+      toast.error("Please enter a valid 10-digit number");
       return;
     }
 
     setError(null);
+    const toastId = toast.loading('Sending OTP...');
 
     try {
-      const appVerifier = window.recaptchaVerifier;
-      const result = await signInWithPhoneNumber(auth, `+91${phoneNumber}`, appVerifier);
-      setConfirmationResult(result);
-      setStage(2); // Go to OTP Input
+        const appVerifier = window.recaptchaVerifier;
+        const result = await signInWithPhoneNumber(auth, `+91${phoneNumber}`, appVerifier);
+        setConfirmationResult(result); 
+        setStage(2); 
+        toast.success('OTP Sent!', { id: toastId });
     } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Failed to send OTP");
+        console.error(err);
+        toast.error(err.message || "Failed to send OTP", { id: toastId });
     }
   };
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault(); // <--- THIS STOPS THE PAGE REFRESH ALSO
-
+    e.preventDefault(); 
+    
     if (!otp || otp.length !== 6) {
-      setError("Please enter a valid 6-digit OTP");
+      toast.error("Please enter a valid 6-digit OTP");
       return;
     }
 
     try {
-      const userCredential = await confirmationResult!.confirm(otp);
-      const token = await userCredential.user.getIdToken();
-      setFirebaseToken(token); // Store token for next step
-
-      // Go directly to Step 1 server check
-      handleServerLogin(token);
+        const userCredential = await confirmationResult!.confirm(otp);
+        const token = await userCredential.user.getIdToken();
+        setFirebaseToken(token); 
+        handleServerLogin(token); 
     } catch (err: any) {
-      console.error(err);
-      setError("Invalid OTP. Please try again.");
+        console.error(err);
+        toast.error("Invalid OTP. Please try again.");
     }
   };
 
@@ -126,18 +132,12 @@ export default function LoginPage() {
   const handlePasswordLogin = (password: string) => {
     handleServerLogin(firebaseToken, password);
   };
-
-  // --- Render Switcher ---
+  
+  // ... render logic (same as before) ...
   const renderForm = () => {
-    if (stage === 1) {
-      return <PhoneForm value={phoneNumber} onChange={setPhoneNumber} onSubmit={handleSendOtp} isLoading={isLoading} />;
-    }
-    if (stage === 2) {
-      return <OtpForm value={otp} onChange={setOtp} onSubmit={handleVerifyOtp} onBack={() => setStage(1)} isLoading={isLoading} />;
-    }
-    if (stage === 3) {
-      return <PasswordForm onLogin={handlePasswordLogin} isLoading={isLoading} error={error} />;
-    }
+    if (stage === 1) return <PhoneForm value={phoneNumber} onChange={setPhoneNumber} onSubmit={handleSendOtp} isLoading={isLoading} />;
+    if (stage === 2) return <OtpForm value={otp} onChange={setOtp} onSubmit={handleVerifyOtp} onBack={() => setStage(1)} isLoading={isLoading} />;
+    if (stage === 3) return <PasswordForm onLogin={handlePasswordLogin} isLoading={isLoading} error={error} />;
     return null;
   };
 
@@ -154,7 +154,7 @@ export default function LoginPage() {
               <Typography variant="body1" color="text.secondary">{stage === 3 ? 'Enter your Admin Password to continue.' : 'Sign in via phone number'}</Typography>
             </Box>
 
-            {/* Show error only in Step 1/2 */}
+            {/* Keeping inline alert for persistent errors, but Toast handles the popup */}
             {stage !== 3 && error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
             {renderForm()}

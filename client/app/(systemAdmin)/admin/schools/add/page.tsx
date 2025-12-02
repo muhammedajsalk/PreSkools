@@ -8,11 +8,11 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 // Import Components
-import { adminTheme, FormData, FormErrors, PlanType, steps } from '../../../../src/components/admin/schools/add/SchoolConfig';
-import SchoolStepper from '../../../../src/components/admin/schools/add/SchoolStepper';
-import Step1SchoolDetails from '../../../../src/components/admin/schools/add/Step1SchoolDetails';
-import Step2PlanSelection from '../../../../src/components/admin/schools/add/Step2PlanSelection';
-import Step3AdminAssign from '../../../../src/components/admin/schools/add/Step3AdminAssign'; // (I assume you will create this similarly or I can provide)
+import { adminTheme, FormData, FormErrors, PlanType, steps } from '../../../../../src/components/admin/schools/add/SchoolConfig';
+import SchoolStepper from '../../../../../src/components/admin/schools/add/SchoolStepper';
+import Step1SchoolDetails from '../../../../../src/components/admin/schools/add/Step1SchoolDetails';
+import Step2PlanSelection from '../../../../../src/components/admin/schools/add/Step2PlanSelection';
+import Step3AdminAssign from '../../../../../src/components/admin/schools/add/Step3AdminAssign'; // (I assume you will create this similarly or I can provide)
 
 export default function AddSchoolPage() {
   const router = useRouter();

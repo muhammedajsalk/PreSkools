@@ -7,10 +7,10 @@ import EscalatorWarningIcon from '@mui/icons-material/EscalatorWarning';
 import DescriptionIcon from '@mui/icons-material/Description';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import Link from 'next/link';
-import { COLORS, STUDENT_PROFILE } from '../../../../src/components/students/profile/ProfileConfig';
-import ProfileCard from '../../../../src/components/students/profile/ProfileCard';
-import OverviewTab from '../../../../src/components/students/profile/OverviewTab';
-import GuardianTab from '../../../../src/components/students/profile/GuardianTab';
+import { COLORS, STUDENT_PROFILE } from '../../../../../src/components/students/profile/ProfileConfig';
+import ProfileCard from '../../../../../src/components/students/profile/ProfileCard';
+import OverviewTab from '../../../../../src/components/students/profile/OverviewTab';
+import GuardianTab from '../../../../../src/components/students/profile/GuardianTab';
 // import DocumentsTab and TimelineTab similarly...
 
 function TabPanel({ children, value, index }: { children?: React.ReactNode; value: number; index: number }) {

@@ -13,6 +13,9 @@ import { createSchoolValidation, querySchoolValidation, updateSchoolValidation }
 
 const router = Router();
 
+// router.use(protect); 
+// router.use(restrictTo("SUPER_ADMIN"));
+
 router.post("/", protect, restrictTo("SUPER_ADMIN"), validate(createSchoolValidation), createSchool);
 router.get("/", protect, restrictTo("SUPER_ADMIN"), validate(querySchoolValidation), getSchools);
 router.get("/me", protect, restrictTo("SCHOOL_ADMIN"), getMySchool);

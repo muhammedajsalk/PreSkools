@@ -1,13 +1,13 @@
 'use client';
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
-import { COLORS, TEACHER_DATA } from '../../../src/components/teacher/TeacherConfig';
-import TeacherHeader from '../../../src/components/teacher/TeacherHeader';
-import CurrentStatusCard from '../../../src/components/teacher/CurrentStatusCard';
-import QuickActions from '../../../src/components/teacher/QuickActions';
-import AbsentStudents from '../../../src/components/teacher/AbsentStudents';
-import RecentActivity from '../../../src/components/teacher/RecentActivity';
-import SecondaryActions from '../../../src/components/teacher/SecondaryActions'; // (Create this similar to QuickActions if needed)
+import { COLORS, TEACHER_DATA } from '../../../../src/components/teacher/TeacherConfig';
+import TeacherHeader from '../../../../src/components/teacher/TeacherHeader';
+import CurrentStatusCard from '../../../../src/components/teacher/CurrentStatusCard';
+import QuickActions from '../../../../src/components/teacher/QuickActions';
+import AbsentStudents from '../../../../src/components/teacher/AbsentStudents';
+import RecentActivity from '../../../../src/components/teacher/RecentActivity';
+import SecondaryActions from '../../../../src/components/teacher/SecondaryActions'; // (Create this similar to QuickActions if needed)
 
 export default function TeacherDashboardPage() {
   const [teacher] = useState(TEACHER_DATA);

@@ -3,10 +3,10 @@ import React, { useState, useMemo } from 'react';
 import { Box, Stack, Typography, Button, alpha, useMediaQuery, useTheme } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import AddIcon from '@mui/icons-material/Add';
-import { COLORS, MOCK_STUDENTS, StatusType } from '../../../src/components/students/StudentConfig';
-import StudentFilterBar from '../../../src/components/students/StudentFilterBar';
-import StudentTable from '../../../src/components/students/StudentTable';
-import ActionMenu from '../../../src/components/students/ActionMenu';
+import { COLORS, MOCK_STUDENTS, StatusType } from '../../../../src/components/students/StudentConfig';
+import StudentFilterBar from '../../../../src/components/students/StudentFilterBar';
+import StudentTable from '../../../../src/components/students/StudentTable';
+import ActionMenu from '../../../../src/components/students/ActionMenu';
 
 export default function StudentDirectoryPage() {
   const theme = useTheme();

@@ -1,12 +1,12 @@
 'use client';
 import React, { useState } from 'react';
 import { Box, useTheme, useMediaQuery } from '@mui/material';
-import { mockClassrooms, mockStudents, COLORS, CreateClassFormData, AddStudentFormData } from '../../../src/components/academic/AcademicConfig';
-import ClassList from '../../../src/components/academic/ClassList';
-import ClassDetails from '../../../src/components/academic/ClassDetails';
-import CreateClassDialog from '../../../src/components/academic/dialogs/CreateClassDialog';
-import AddStudentDialog from '../../../src/components/academic/dialogs/AddStudentDialog';
-import EditTeacherDialog from '../../../src/components/academic/dialogs/EditTeacherDialog';
+import { mockClassrooms, mockStudents, COLORS, CreateClassFormData, AddStudentFormData } from '../../../../src/components/academic/AcademicConfig';
+import ClassList from '../../../../src/components/academic/ClassList';
+import ClassDetails from '../../../../src/components/academic/ClassDetails';
+import CreateClassDialog from '../../../../src/components/academic/dialogs/CreateClassDialog';
+import AddStudentDialog from '../../../../src/components/academic/dialogs/AddStudentDialog';
+import EditTeacherDialog from '../../../../src/components/academic/dialogs/EditTeacherDialog';
 
 export default function AcademicManagementPage() {
   const theme = useTheme();

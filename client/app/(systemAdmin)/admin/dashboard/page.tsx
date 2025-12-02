@@ -3,13 +3,13 @@ import React from 'react';
 import { Box, Typography, Stack, Button } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AddBusinessIcon from '@mui/icons-material/AddBusiness';
-import { adminTheme } from '../../../src/components/admin/dashboard/AdminConfig';
-import { statsData, revenueData, systemAlerts, serverMetrics, recentOnboardings } from '../../../src/components/admin/dashboard/MockData';
-import StatCard from '../../../src/components/admin/dashboard/StatCard';
-import RevenueChart from '../../../src/components/admin/dashboard/RevenueChart';
-import SystemAlerts from '../../../src/components/admin/dashboard/SystemAlerts';
-import ServerHealth from '../../../src/components/admin/dashboard/ServerHealth';
-import OnboardingTable from '../../../src/components/admin/dashboard/OnboardingTable';
+import { adminTheme } from '../../../../src/components/admin/dashboard/AdminConfig';
+import { statsData, revenueData, systemAlerts, serverMetrics, recentOnboardings } from '../../../../src/components/admin/dashboard/MockData';
+import StatCard from '../../../../src/components/admin/dashboard/StatCard';
+import RevenueChart from '../../../../src/components/admin/dashboard/RevenueChart';
+import SystemAlerts from '../../../../src/components/admin/dashboard/SystemAlerts';
+import ServerHealth from '../../../../src/components/admin/dashboard/ServerHealth';
+import OnboardingTable from '../../../../src/components/admin/dashboard/OnboardingTable';
 
 export default function SuperAdminDashboard() {
   return (

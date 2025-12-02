@@ -2,14 +2,14 @@
 
 import React, { useState } from 'react';
 import { Box, Stack, Typography, useMediaQuery, useTheme, Menu, MenuItem, ListItemIcon, Avatar, ListItemText } from '@mui/material';
-import { MOCK_CHILDREN, MOCK_HIGHLIGHTS, MOCK_TODAY_OVERVIEW, MOCK_QUICK_STATS, MOCK_ACTIVITY_FEED, COLORS, Child, getInitials } from '../../../../src/components/parents/ParentConfig';
-import ParentHeader from '../../../../src/components/parents/ParentHeader';
-import MobileHeader from '../../../../src/components/parents/MobileHeader';
-import StoryHighlight from '../../../../src/components/parents/StoryHighlight';
-import TodayOverviewCard from '../../../../src/components/parents/TodayOverviewCard';
-import QuickStatsGrid from '../../../../src/components/parents/QuickStatsGrid';
-import ActivityFeedCard from '../../../../src/components/parents/ActivityFeedCard';
-import BottomNav from '../../../../src/components/parents/BottomNav';
+import { MOCK_CHILDREN, MOCK_HIGHLIGHTS, MOCK_TODAY_OVERVIEW, MOCK_QUICK_STATS, MOCK_ACTIVITY_FEED, COLORS, Child, getInitials } from '@/src/components/parents/ParentConfig';
+import ParentHeader from '@/src/components/parents/ParentHeader';
+import MobileHeader from '@/src/components/parents/MobileHeader';
+import StoryHighlight from '@/src/components/parents/StoryHighlight';
+import TodayOverviewCard from '@/src/components/parents/TodayOverviewCard';
+import QuickStatsGrid from '@/src/components/parents/QuickStatsGrid';
+import ActivityFeedCard from '@/src/components/parents/ActivityFeedCard';
+import BottomNav from '@/src/components/parents/BottomNav';
 import CalendarWidget from '@/src/components/parents/CalendarWidget';
 
 

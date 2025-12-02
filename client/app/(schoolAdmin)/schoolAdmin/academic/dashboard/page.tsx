@@ -1,13 +1,13 @@
 'use client';
 import React from 'react';
 import { Box, Stack } from '@mui/material';
-import { brandColors, MOCK_DATA } from '../../../src/components/dashboard/DashboardConfig';
-import WelcomeBanner from '../../../src/components/dashboard/WelcomeBanner';
-import DailyStats from '../../../src/components/dashboard/DailyStats';
-import FeeOverview from '../../../src/components/dashboard/FeeOverview';
-import ActivityFeed from '../../../src/components/dashboard/ActivityFeed';
-import QuickActions from '../../../src/components/dashboard/QuickActions';
-import SchoolSpeedDial from '../../../src/components/dashboard/SchoolSpeedDial';
+import { brandColors, MOCK_DATA } from '../../../../../src/components/dashboard/DashboardConfig';
+import WelcomeBanner from '../../../../../src/components/dashboard/WelcomeBanner';
+import DailyStats from '../../../../../src/components/dashboard/DailyStats';
+import FeeOverview from '../../../../../src/components/dashboard/FeeOverview';
+import ActivityFeed from '../../../../../src/components/dashboard/ActivityFeed';
+import QuickActions from '../../../../../src/components/dashboard/QuickActions';
+import SchoolSpeedDial from '../../../../../src/components/dashboard/SchoolSpeedDial';
 
 export default function SchoolAdminDashboard() {
   return (

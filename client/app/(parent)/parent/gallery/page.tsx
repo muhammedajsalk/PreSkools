@@ -3,11 +3,11 @@ import React, { useState, useMemo } from 'react';
 import { Box, Typography, Stack, Chip, useMediaQuery, useTheme, Card, CardContent, CardActionArea, alpha,IconButton } from '@mui/material';
 import PhotoAlbumIcon from '@mui/icons-material/PhotoAlbum';
 import GridViewIcon from '@mui/icons-material/GridView';
-import { MOCK_PHOTOS, MOCK_ALBUMS, FILTERS, Photo } from '../../../../src/components/parents/gallery/GalleryConfig';
-import {COLORS} from '../../../../src/components/parents/ParentConfig'
-import PhotoGrid from '../../../../src/components/parents/gallery/PhotoGrid';
-import Lightbox from '../../../../src/components/parents/gallery/Lightbox';
-import BottomNav from '../../../../src/components/parents/BottomNav'; // Reusing nav
+import { MOCK_PHOTOS, MOCK_ALBUMS, FILTERS, Photo } from '@/src/components/parents/gallery/GalleryConfig';
+import {COLORS} from '@/src/components/parents/ParentConfig'
+import PhotoGrid from '@/src/components/parents/gallery/PhotoGrid';
+import Lightbox from '@/src/components/parents/gallery/Lightbox';
+import BottomNav from '@/src/components/parents/BottomNav'; // Reusing nav
 
 export default function ParentGalleryPage() {
   const theme = useTheme();

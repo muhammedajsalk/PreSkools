@@ -114,7 +114,7 @@ export default function ParentDashboardPage() {
             </Box>
 
             {/* Bottom Navigation (Fixed) */}
-            <Box sx={{ mt: 8 }}>
+            <Box sx={{ mt: 14 }}>
                 <BottomNav activeTab={activeNavTab} onTabChange={setActiveNavTab} />
             </Box>
         </Box>

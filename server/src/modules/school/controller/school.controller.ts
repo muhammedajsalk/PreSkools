@@ -1,26 +1,18 @@
 import { Request, Response, NextFunction } from "express";
 import { createSchoolService, deleteSchoolService, getAllSchoolsService, getMySchoolService, getSchoolByIdService, updateSchoolService } from "../service/school.service";
+import { catchAsync } from "../../../middleware/catchAsync";
 
-export const createSchool = async (req: Request, res: Response, next: NextFunction) => {
-    try {
+export const createSchool = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         const school = await createSchoolService(req.body);
-        res.status(201).json({ success: true, data: school });
-    } catch (error) {
-        next(error);
-    }
-};
+        res.status(201).json({ success: true, data: school })
+});
 
-export const getMySchool = async (req: Request, res: Response, next: NextFunction) => {
-    try {
+export const getMySchool = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         const school = await getMySchoolService(req.user!.school_id);
         res.status(200).json({ success: true, data: school });
-    } catch (error) {
-        next(error);
-    }
-};
+});
 
-export const getSchools = async (req: Request, res: Response, next: NextFunction) => {
-    try {
+export const getSchools = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         const params = {
             page: Number(req.query.page) || 1,
             limit: Number(req.query.limit) || 10,
@@ -34,35 +26,20 @@ export const getSchools = async (req: Request, res: Response, next: NextFunction
         const result = await getAllSchoolsService(params);
 
         res.status(200).json({ success: true, ...result });
-    } catch (error) {
-        next(error);
-    }
-};
+});
 
-export const getSchoolById = async (req: Request, res: Response, next: NextFunction) => {
-    try {
+export const getSchoolById = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         const school = await getSchoolByIdService(req.params.id);
         res.status(200).json({ success: true, data: school });
-    } catch (error) {
-        next(error);
-    }
-};
+});
 
-export const updateSchool = async (req: Request, res: Response, next: NextFunction) => {
-    try {
+export const updateSchool = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         const updated = await updateSchoolService(req.params.id, req.body);
         res.status(200).json({ success: true, data: updated });
-    } catch (error) {
-        next(error);
-    }
-};
+});
 
-export const deleteSchool = async (req: Request, res: Response, next: NextFunction) => {
-    try {
+export const deleteSchool = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         await deleteSchoolService(req.params.id);
         res.status(200).json({ success: true, message: "School deleted" });
-    } catch (error) {
-        next(error);
-    }
-};
+});
 

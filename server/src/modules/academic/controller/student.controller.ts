@@ -6,48 +6,29 @@ import {
   updateStudentService,
   deleteStudentService,
 } from "../service/student.service";
+import { catchAsync } from "../../../middleware/catchAsync";
 
-export const createStudent = async (req: Request, res: Response, next: NextFunction) => {
-  try {
+export const createStudent = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const data = await createStudentService(req.user!.school_id!, req.body);
     res.status(201).json({ success: true, data });
-  } catch (err) {
-    next(err);
-  }
-};
+});
 
-export const getStudents = async (req: Request, res: Response, next: NextFunction) => {
-  try {
+export const getStudents = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const result = await getAllStudentsService(req.user!.school_id!, req.query);
     res.status(200).json({ success: true, ...result });
-  } catch (err) {
-    next(err);
-  }
-};
+});
 
-export const getStudentById = async (req: Request, res: Response, next: NextFunction) => {
-  try {
+export const getStudentById = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const data = await getStudentByIdService(req.user!.school_id!, req.params.id);
     res.status(200).json({ success: true, data });
-  } catch (err) {
-    next(err);
-  }
-};
+});
 
-export const updateStudent = async (req: Request, res: Response, next: NextFunction) => {
-  try {
+export const updateStudent = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const data = await updateStudentService(req.user!.school_id!, req.params.id, req.body);
     res.status(200).json({ success: true, data });
-  } catch (err) {
-    next(err);
-  }
-};
+});
 
-export const deleteStudent = async (req: Request, res: Response, next: NextFunction) => {
-  try {
+export const deleteStudent = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     await deleteStudentService(req.user!.school_id!, req.params.id);
     res.status(200).json({ success: true, message: "Student deleted" });
-  } catch (err) {
-    next(err);
-  }
-};
+});

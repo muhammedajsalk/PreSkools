@@ -1,11 +1,16 @@
 import { apiSlice } from "./apiSlice";
 
+interface LoginCredentials {
+  token: string;
+  stepTwoPassword?: string; // <-- ADDED: Now TypeScript knows this field exists
+}
+
 export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     
     // Login Mutation
     login: builder.mutation({
-      query: (credentials: { token: string }) => ({
+      query: (credentials: LoginCredentials) => ({
         url: '/auth/login',
         method: 'POST',
         body: credentials,

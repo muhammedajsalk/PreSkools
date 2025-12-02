@@ -8,6 +8,7 @@ import { PhoneForm, OtpForm } from "../../../src/components/auth/LoginForms";
 import { auth } from "../../../src/lib/firebase"; 
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
 import axios from 'axios'
+import { useLoginMutation } from "@/src/store/api/authApiSlice";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function LoginPage() {
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loginApi, { isLoading: isLoginLoading, error: loginError }] = useLoginMutation();
   
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
@@ -75,27 +77,17 @@ export default function LoginPage() {
       
       const token = await firebaseUser.getIdToken();
 
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
-        token: token
-      });
+      // 2. Call the API
+      const response = await loginApi({ token }).unwrap(); 
+      // .unwrap() allows you to catch errors in the try/catch block
 
-      const data = res.data;
+      console.log("Server Response:", response);
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      
-      alert("Login Successful!");
-      router.push("/dashboard"); 
+      localStorage.setItem("token", response.token);
+      router.push("/dashboard");
 
     } catch (err: any) {
-      console.error("Login Error:", err);
-
-      if (axios.isAxiosError(err)) {
-        const serverMessage = err.response?.data?.message || err.response?.data?.error;
-        setError(serverMessage || "Server connection failed.");
-      } else {
-        setError(err.message || "Invalid OTP or Unknown Error.");
-      }
+      console.error("Login Failed", err);
     } finally {
       setIsLoading(false);
     }

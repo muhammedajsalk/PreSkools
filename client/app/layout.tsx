@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import ThemeRegistry from "../src/components/ThemeRegistry"; // Import the wrapper
+import ThemeRegistry from "@/src/components/ThemeRegistry";
+import StoreProvider from "@/src/store/StoreProvider"; // <--- Import this
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -18,10 +19,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        {/* Use the Client Component wrapper */}
-        <ThemeRegistry>
-          {children}
-        </ThemeRegistry>
+        <StoreProvider> {/* <--- Wrap Redux here */}
+          <ThemeRegistry>
+            {children}
+          </ThemeRegistry>
+        </StoreProvider>
       </body>
     </html>
   );

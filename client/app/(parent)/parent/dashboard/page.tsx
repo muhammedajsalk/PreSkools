@@ -10,6 +10,8 @@ import TodayOverviewCard from '../../../../src/components/parents/TodayOverviewC
 import QuickStatsGrid from '../../../../src/components/parents/QuickStatsGrid';
 import ActivityFeedCard from '../../../../src/components/parents/ActivityFeedCard';
 import BottomNav from '../../../../src/components/parents/BottomNav';
+import CalendarWidget from '@/src/components/parents/CalendarWidget';
+
 
 export default function ParentDashboardPage() {
     const theme = useTheme();
@@ -56,7 +58,7 @@ export default function ParentDashboardPage() {
             </Menu>
 
             {/* --- 2. MAIN CONTENT (Layout using Flexbox) --- */}
-            <Box sx={{ maxWidth: 1200, mx: 'auto', p: { xs: 2, md: 3 }, pb: 12 }}>
+            <Box sx={{ maxWidth: 1200, mx: 'auto', p: { xs: 2, md: 3 }, pb: 18 }}>
 
                 <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
 
@@ -77,6 +79,11 @@ export default function ParentDashboardPage() {
                                 <Stack direction="row" spacing={2} sx={{ overflowX: 'auto', pb: 1, '&::-webkit-scrollbar': { display: 'none' } }}>
                                     {MOCK_HIGHLIGHTS.map(s => <StoryHighlight key={s.id} story={s} onClick={() => console.log(s.id)} size="medium" />)}
                                 </Stack>
+                            </Box>
+
+                            {/* New Calendar Widget */}
+                            <Box sx={{ mb: 3 }}>
+                                <CalendarWidget />
                             </Box>
 
                             {/* Overview Card */}
@@ -113,7 +120,7 @@ export default function ParentDashboardPage() {
                 </Box>
             </Box>
 
-            {/* Bottom Navigation (Fixed) */}
+            {/* Bottom Navigation */}
             <Box sx={{ mt: 14 }}>
                 <BottomNav activeTab={activeNavTab} onTabChange={setActiveNavTab} />
             </Box>

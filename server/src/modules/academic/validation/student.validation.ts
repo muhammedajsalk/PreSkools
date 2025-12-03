@@ -6,7 +6,7 @@ export const createStudentSchema = Joi.object({
   dob: Joi.date().required(),
   gender: Joi.string().valid("Male", "Female", "Other").required(),
   parent_name: Joi.string().required(),
-  parent_phone: Joi.string().pattern(/^[0-9]{10}$/).required(),
+  parent_phone: Joi.string().pattern(/^[0-9]{12}$/).required(),
   class_id: Joi.string().required(),
   address: Joi.string().optional().allow(""),
   blood_group: Joi.string().optional(),
@@ -16,7 +16,7 @@ export const createStudentSchema = Joi.object({
 export const updateStudentSchema = Joi.object({
   name: Joi.string(),
   class_id: Joi.string(),
-  parent_phone: Joi.string().pattern(/^[0-9]{10}$/),
+  parent_phone: Joi.string().pattern(/^[0-9]{12}$/),
   status: Joi.string().valid("ACTIVE", "ALUMNI", "DROPPED"),
   address: Joi.string(),
   blood_group: Joi.string(),

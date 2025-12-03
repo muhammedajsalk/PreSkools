@@ -1,3 +1,4 @@
+'use client';
 import React, { useMemo } from 'react';
 import { Box, Stack, Typography, Button, TextField, InputAdornment, Card, CardActionArea, CardContent, Badge, Avatar, alpha } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
@@ -7,7 +8,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { COLORS, Classroom, Student, getTeacherById, getAvatarColor, getInitials } from './AcademicConfig';
 
 interface Props {
-  classrooms: Classroom[];
+  classrooms: any[]; // Changed to any[] to accept both Mock (id) and Real (_id) data
   students: Student[];
   selectedClassId: string | null;
   searchQuery: string;
@@ -35,12 +36,22 @@ export default function ClassList({ classrooms, students, selectedClassId, searc
       <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
         <Stack spacing={1.5}>
           {filteredClassrooms.map((c) => {
-            const teacher = getTeacherById(c.teacherId);
-            const count = students.filter(s => s.classId === c.id).length;
-            const isSelected = selectedClassId === c.id;
+            // --- FIX: Handle both _id (Mongo) and id (Mock) ---
+            const classId = c._id || c.id; 
+            
+            // Handle Teacher name safely (Real API populates object, Mock uses ID string)
+            const teacherName = c.teacher_id?.name || (getTeacherById(c.teacherId)?.name) || "Unassigned";
+            
+            const count = students.filter(s => (s.classId || (s as any).class_id?._id || (s as any).class_id) === classId).length;
+            const isSelected = selectedClassId === classId;
+
             return (
-              <Card key={c.id} elevation={isSelected ? 2 : 0} sx={{ border: isSelected ? `2px solid ${COLORS.primary}` : '1px solid divider', bgcolor: isSelected ? alpha(COLORS.primary, 0.04) : COLORS.cardBg }}>
-                <CardActionArea onClick={() => onSelect(c.id)}>
+              <Card 
+                key={classId} // <--- FIX: Unique Key is now guaranteed
+                elevation={isSelected ? 2 : 0} 
+                sx={{ border: isSelected ? `2px solid ${COLORS.primary}` : '1px solid divider', bgcolor: isSelected ? alpha(COLORS.primary, 0.04) : COLORS.cardBg }}
+              >
+                <CardActionArea onClick={() => onSelect(classId)}>
                   <CardContent sx={{ p: 2 }}>
                     <Stack direction="row" alignItems="center" justifyContent="space-between">
                       <Box>
@@ -48,7 +59,10 @@ export default function ClassList({ classrooms, students, selectedClassId, searc
                           <Typography variant="h6" fontWeight={700}>{c.name}-{c.section}</Typography>
                           <Badge badgeContent={count} color="primary"><GroupsIcon fontSize="small" sx={{ color: COLORS.textSecondary }} /></Badge>
                         </Stack>
-                        {teacher && <Stack direction="row" alignItems="center" spacing={1}><Avatar sx={{ width: 24, height: 24, bgcolor: getAvatarColor(teacher.name), fontSize: '0.7rem' }}>{getInitials(teacher.name)}</Avatar><Typography variant="body2" color="text.secondary">{teacher.name}</Typography></Stack>}
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          <Avatar sx={{ width: 24, height: 24, bgcolor: getAvatarColor(teacherName), fontSize: '0.7rem' }}>{getInitials(teacherName)}</Avatar>
+                          <Typography variant="body2" color="text.secondary">{teacherName}</Typography>
+                        </Stack>
                       </Box>
                       <ChevronRightIcon sx={{ color: isSelected ? COLORS.primary : COLORS.textSecondary }} />
                     </Stack>

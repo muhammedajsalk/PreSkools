@@ -1,12 +1,14 @@
 'use client';
 import React, { useState } from 'react';
-import { Box, useTheme, useMediaQuery } from '@mui/material';
-import { mockClassrooms, mockStudents, COLORS, CreateClassFormData, AddStudentFormData } from '../../../../src/components/academic/AcademicConfig';
-import ClassList from '../../../../src/components/academic/ClassList';
-import ClassDetails from '../../../../src/components/academic/ClassDetails';
-import CreateClassDialog from '../../../../src/components/academic/dialogs/CreateClassDialog';
-import AddStudentDialog from '../../../../src/components/academic/dialogs/AddStudentDialog';
-import EditTeacherDialog from '../../../../src/components/academic/dialogs/EditTeacherDialog';
+import { Box, useTheme, useMediaQuery, CircularProgress } from '@mui/material';
+import { COLORS } from '@/src/components/academic/AcademicConfig';
+import ClassList from '@/src/components/academic/ClassList';
+import ClassDetails from '@/src/components/academic/ClassDetails';
+import CreateClassDialog from '@/src/components/academic/dialogs/CreateClassDialog';
+import AddStudentDialog from '@/src/components/academic/dialogs/AddStudentDialog';
+
+// 1. Import Hooks
+import { useGetClassesQuery, useGetStudentsQuery } from '@/src/store/api/academicApiSlice';
 
 export default function AcademicManagementPage() {
   const theme = useTheme();
@@ -14,43 +16,56 @@ export default function AcademicManagementPage() {
   
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [classrooms, setClassrooms] = useState(mockClassrooms);
-  const [students, setStudents] = useState(mockStudents);
-  
-  // Dialog States
   const [createOpen, setCreateOpen] = useState(false);
   const [studentOpen, setStudentOpen] = useState(false);
-  const [teacherOpen, setTeacherOpen] = useState(false);
 
-  const handleCreateClass = (data: CreateClassFormData) => {
-    setClassrooms([...classrooms, { id: `c${classrooms.length + 1}`, ...data, academicYear: '2024-25' }]);
-  };
+  // 2. Fetch Real Data
+  const { data: classData, isLoading: classLoading } = useGetClassesQuery();
+  
+  // Only fetch students if a class is selected
+  const { data: studentData, isLoading: studentLoading } = useGetStudentsQuery(
+    { class_id: selectedClassId, search: searchQuery }, 
+    { skip: !selectedClassId } // Don't fetch if no class selected
+  );
 
-  const handleAddStudent = (data: AddStudentFormData) => {
-    if (!selectedClassId) return;
-    setStudents([...students, { id: `s${students.length + 1}`, ...data, classId: selectedClassId, status: 'active', avatar: '', admissionDate: '2024' }]);
-  };
+  const classrooms = classData?.data || [];
+  const students = studentData?.data || [];
 
-  const handleUpdateTeacher = (teacherId: string) => {
-    if (!selectedClassId) return;
-    setClassrooms(classrooms.map(c => c.id === selectedClassId ? { ...c, teacherId } : c));
-  };
+  // Logic for Dialogs
+  const selectedClass = classrooms.find((c: any) => c._id === selectedClassId);
+  const className = selectedClass ? `${selectedClass.name}-${selectedClass.section}` : '';
+
+  if (classLoading) return <Box sx={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><CircularProgress sx={{ color: COLORS.primary }} /></Box>;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, height: { xs: 'auto', md: 'calc(100vh - 64px)' }, minHeight: { xs: 'calc(100vh - 64px)' }, bgcolor: COLORS.background }}>
+      
+      {/* Left: Class List */}
       <ClassList 
-        classrooms={classrooms} students={students} selectedClassId={selectedClassId}
-        searchQuery={searchQuery} setSearchQuery={setSearchQuery}
-        onSelect={setSelectedClassId} onCreate={() => setCreateOpen(true)} isMobile={isMobile}
+        classrooms={classrooms as any} 
+        students={[]} // Note: Backend doesn't send student count in class list yet (optimization for later)
+        selectedClassId={selectedClassId}
+        searchQuery={searchQuery} 
+        setSearchQuery={setSearchQuery}
+        onSelect={setSelectedClassId} 
+        onCreate={() => setCreateOpen(true)} 
+        isMobile={isMobile}
       />
+
+      {/* Right: Details */}
       <ClassDetails 
-        selectedClassId={selectedClassId} classrooms={classrooms} students={students}
-        onBack={() => setSelectedClassId(null)} onAddStudent={() => setStudentOpen(true)} onEditTeacher={() => setTeacherOpen(true)} isMobile={isMobile}
+        selectedClassId={selectedClassId} 
+        classrooms={classrooms as any} 
+        students={students as any}
+        onBack={() => setSelectedClassId(null)} 
+        onAddStudent={() => setStudentOpen(true)} 
+        onEditTeacher={() => {}} 
+        isMobile={isMobile}
       />
       
-      <CreateClassDialog open={createOpen} onClose={() => setCreateOpen(false)} onSubmit={handleCreateClass} />
-      <AddStudentDialog open={studentOpen} onClose={() => setStudentOpen(false)} onSubmit={handleAddStudent} className="" />
-      <EditTeacherDialog open={teacherOpen} onClose={() => setTeacherOpen(false)} currentTeacherId="" onSubmit={handleUpdateTeacher} className="" />
+      {/* Dialogs */}
+      <CreateClassDialog open={createOpen} onClose={() => setCreateOpen(false)} />
+      <AddStudentDialog open={studentOpen} onClose={() => setStudentOpen(false)} className={className} classId={selectedClassId} />
     </Box>
   );
 }

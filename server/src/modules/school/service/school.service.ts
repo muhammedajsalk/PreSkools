@@ -24,30 +24,49 @@ interface CreateSchoolPayload {
 }
 
 export const createSchoolService = async (payload: CreateSchoolPayload) => {
+
   const { name, address, phone, email, admin_phone, plan } = payload;
 
-  const adminUser = await User.findOne({ phone: admin_phone });
-  if (!adminUser) throw new AppError("Admin user not found. Create User first.", 404);
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  if (adminUser.school_id) {
-    throw new AppError("This user is already an admin of another school.", 400);
+  try {
+    const schoolAdminUser = await User.findOne({ phone: admin_phone, role: "SCHOOL_ADMIN" });
+
+    if (schoolAdminUser) {
+      throw new AppError("This user is already an admin of another school.", 400);
+    }
+
+    const password = email.split("@")[0];
+
+    const newAdmin = await User.create({
+      name: `${name} admin`,
+      phone: `+91${admin_phone}`,
+      role: "SCHOOL_ADMIN",
+      password: `${password}@123`
+    })
+
+    const school = await School.create({
+      name,
+      address,
+      phone:`+91${phone}`,
+      email,
+      admin_id: newAdmin._id,
+      subscription_plan: plan || "SEED",
+    });
+
+    newAdmin.school_id = school._id as mongoose.Types.ObjectId; 
+    newAdmin.role = "SCHOOL_ADMIN";
+    await newAdmin.save();
+
+    return school;
+
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
   }
 
-  const school = await School.create({
-    name,
-    address,
-    phone,
-    email,
-    admin_id: adminUser._id,
-    subscription_plan: plan || "SEED",
-  });
-
-
-  adminUser.school_id = school._id as mongoose.Types.ObjectId; // Proper casting
-  adminUser.role = "SCHOOL_ADMIN";
-  await adminUser.save();
-
-  return school;
 };
 
 export const getMySchoolService = async (schoolId: string) => {

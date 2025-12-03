@@ -10,8 +10,16 @@ import RevenueChart from '../../../../src/components/admin/dashboard/RevenueChar
 import SystemAlerts from '../../../../src/components/admin/dashboard/SystemAlerts';
 import ServerHealth from '../../../../src/components/admin/dashboard/ServerHealth';
 import OnboardingTable from '../../../../src/components/admin/dashboard/OnboardingTable';
+import { useRouter } from 'next/navigation';
+import AddSchoolPage from '../schools/add/page';
 
 export default function SuperAdminDashboard() {
+  const router = useRouter();
+
+  const handleAddSchool = () => {
+    router.push("/admin/schools/add");
+  };
+
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: adminTheme.background.default, p: { xs: 2, sm: 3, md: 4 } }}>
       
@@ -26,7 +34,7 @@ export default function SuperAdminDashboard() {
         </Box>
         <Stack direction="row" spacing={2}>
           <Button variant="outlined" startIcon={<RefreshIcon />}>Refresh</Button>
-          <Button variant="contained" startIcon={<AddBusinessIcon />} sx={{ background: adminTheme.primary.gradient }}>Add School</Button>
+          <Button variant="contained" startIcon={<AddBusinessIcon />} sx={{ background: adminTheme.primary.gradient }} onClick={handleAddSchool}>Add School</Button>
         </Stack>
       </Stack>
 

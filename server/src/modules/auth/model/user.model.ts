@@ -12,6 +12,9 @@ export interface IUser extends Document {
   createdAt: Date;
   updatedAt: Date;
   password?: string;
+  qualification?: string;
+  experience?: string;
+  joiningDate?: Date;
   matchPassword?(enteredPassword: string): Promise<boolean>;
 }
 
@@ -20,6 +23,7 @@ const UserSchema: Schema = new Schema(
   {
     name: { type: String, required: true },
     phone: { type: String, required: true, unique: true },
+    email: { type: String, lowercase: true },
     firebase_uid: { type: String},
     role: {
       type: String,
@@ -32,6 +36,9 @@ const UserSchema: Schema = new Schema(
       type: String,
       select: false, 
     },
+    qualification: { type: String },
+    experience: { type: String },
+    joiningDate: { type: Date },
   },
   {
     timestamps: true,

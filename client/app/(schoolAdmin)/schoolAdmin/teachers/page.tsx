@@ -116,7 +116,7 @@ export default function TeachersPage() {
                     teacher={{
                       id: t._id, // Backend uses _id
                       fullName: t.name, // Backend uses name
-                      phone: t.phone,
+                      phone: `+${t.phone}`,
                       email: t.email,
                       qualification: t.qualification || 'N/A',
                       experience: t.experience || 'New',

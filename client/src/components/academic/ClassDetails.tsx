@@ -1,17 +1,19 @@
 'use client';
 import React, { useState, useMemo } from 'react';
-import { 
-  Box, Stack, Typography, Button, IconButton, Avatar, Tooltip, 
-  TableContainer, Paper, Table, TableHead, TableRow, TableCell, 
-  TableBody, Chip, alpha, TextField, InputAdornment, MenuItem, 
-  Select, FormControl, CircularProgress, TablePagination // 1. Import TablePagination
+import {
+  Box, Stack, Typography, Button, IconButton, Avatar, Tooltip,
+  TableContainer, Paper, Table, TableHead, TableRow, TableCell,
+  TableBody, Chip, alpha, TextField, InputAdornment, MenuItem,
+  Select, FormControl, CircularProgress, TablePagination
 } from '@mui/material';
-import { 
-  ArrowBack, Edit, Add, Groups, Male, Female, Search 
+import {
+  ArrowBack, Edit, Add, Groups, Male, Female, Search
 } from '@mui/icons-material';
 import { COLORS, getAvatarColor, getInitials, getTeacherById } from './AcademicConfig';
 import EmptyState from './EmptyState';
 import { useGetStudentsQuery } from '@/src/store/api/academicApiSlice';
+import AssignTeacherDialog from './dialogs/AssignTeacherDialog';
+import { useRouter } from 'next/navigation';
 
 interface Props {
   selectedClassId: string | null;
@@ -30,45 +32,57 @@ const StatsCard = ({ label, value, icon, color }: { label: string, value: number
 );
 
 export default function ClassDetails({ selectedClassId, classrooms, onBack, onAddStudent, onEditTeacher, isMobile }: Props) {
-  
+
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
-  
-  // 2. Pagination State
-  const [page, setPage] = useState(0); // MUI uses 0-based index
+  const [statusFilter, setStatusFilter] = useState(''); // Default empty for 'All'
+
+  const [assignTeacherOpen, setAssignTeacherOpen] = useState(false);
+
+  const router = useRouter();
+
+  // Pagination State
+  const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // 3. Fetch Students (Pass page & limit)
-  const { data: studentResponse, isLoading } = useGetStudentsQuery(
-    { 
-      class_id: selectedClassId, 
+  const handleStudentClick = (studentId: string) => {
+    router.push(`/schoolAdmin/students/${studentId}`);
+  };
+
+  // 1. Fetch Students (Pass ALL filters to Backend)
+  const { data: studentResponse, isLoading, isFetching } = useGetStudentsQuery(
+    {
+      class_id: selectedClassId,
       search: searchQuery,
-      page: page + 1, // API expects 1-based index
+      // If status is 'ALL' or empty, don't send it. If specific, send it.
+      // (Assumes you add 'status' to your API slice definition)
+      // status: statusFilter === 'ALL' ? undefined : statusFilter, 
+      page: page + 1,
       limit: rowsPerPage
-    }, 
+    },
     { skip: !selectedClassId }
   );
 
-  const students = studentResponse?.students || [];
+  // 2. Use Data Directly (No Client-Side Filtering)
+  const students = studentResponse?.students || (studentResponse as any)?.data || [];
   const totalCount = studentResponse?.total || 0;
 
-  // 4. Handle Pagination Changes
+  // Pagination Handlers
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); // Reset to first page
+    setPage(0);
   };
 
-  // --- 5. Filtering (Keep as fallback or for status) ---
-  const filteredStudents = useMemo(() => {
-    if (statusFilter === 'ALL') return students;
-    return students.filter((s: any) => s.status === statusFilter);
-  }, [students, statusFilter]);
+  // Debounce Search (Optional optimization, for now direct state update)
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setPage(0); // Reset to first page on new search
+  };
 
-  // --- Class Logic ---
+  // Class Logic
   const selectedClassroom = useMemo(() => {
     return classrooms.find(c => (c._id || c.id) === selectedClassId);
   }, [classrooms, selectedClassId]);
@@ -79,11 +93,11 @@ export default function ClassDetails({ selectedClassId, classrooms, onBack, onAd
     if (selectedClassroom.teacherId) return getTeacherById(selectedClassroom.teacherId)?.name;
     return "Unassigned";
   }, [selectedClassroom]);
-  
-  // Stats (Using total from API if available, otherwise local)
+
+  // Stats (Note: These are now page-specific unless backend sends total stats)
   const stats = useMemo(() => ({
-    total: totalCount,
-    boys: students.filter((s: any) => (s.gender || '').toLowerCase() === 'male').length, // Note: accurate only for current page
+    total: totalCount, // Total from backend
+    boys: students.filter((s: any) => (s.gender || '').toLowerCase() === 'male').length,
     girls: students.filter((s: any) => (s.gender || '').toLowerCase() === 'female').length
   }), [students, totalCount]);
 
@@ -91,12 +105,10 @@ export default function ClassDetails({ selectedClassId, classrooms, onBack, onAd
 
   return (
     <Box sx={{ flex: 1, display: { xs: !selectedClassId && isMobile ? 'none' : 'flex', md: 'flex' }, flexDirection: 'column', bgcolor: COLORS.background, height: '100%', overflow: 'hidden' }}>
-      
+
       {/* --- HEADER --- */}
       <Box sx={{ p: 2.5, bgcolor: COLORS.cardBg, borderBottom: '1px solid', borderColor: 'divider' }}>
-         {/* ... (Keep existing header code) ... */}
-         {/* Same as previous: Title, Add Button, Search, Filters, Stats */}
-         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
           <Stack direction="row" alignItems="center" spacing={2}>
             {isMobile && <IconButton onClick={onBack} size="small"><ArrowBack /></IconButton>}
             <Box>
@@ -104,7 +116,11 @@ export default function ClassDetails({ selectedClassId, classrooms, onBack, onAd
               <Stack direction="row" alignItems="center" spacing={1} mt={0.5}>
                 <Avatar sx={{ width: 28, height: 28, bgcolor: getAvatarColor(teacherName || "T"), fontSize: '0.75rem' }}>{getInitials(teacherName || "T")}</Avatar>
                 <Typography variant="body2" color="text.secondary">{teacherName}</Typography>
-                <Tooltip title="Change Teacher"><IconButton size="small" onClick={onEditTeacher} sx={{ color: COLORS.primary }}><Edit fontSize="small" /></IconButton></Tooltip>
+                <Tooltip title="Change Teacher">
+                  <IconButton size="small" onClick={() => setAssignTeacherOpen(true)} sx={{ color: COLORS.primary }}>
+                    <Edit fontSize="small" />
+                  </IconButton>
+                </Tooltip>
               </Stack>
             </Box>
           </Stack>
@@ -112,22 +128,46 @@ export default function ClassDetails({ selectedClassId, classrooms, onBack, onAd
         </Stack>
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mb={2}>
-          <TextField 
-            size="small" placeholder="Search students..." value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setPage(0); }} // Reset page on search
-            fullWidth InputProps={{ startAdornment: <InputAdornment position="start"><Search fontSize="small" sx={{ color: COLORS.textSecondary }} /></InputAdornment> }} sx={{ bgcolor: COLORS.background, '& fieldset': { border: 'none' }, borderRadius: 2 }}
+          {/* Search Input */}
+          <TextField
+            size="small"
+            placeholder="Search students..."
+            value={searchQuery}
+            onChange={handleSearch}
+            fullWidth
+            InputProps={{
+              startAdornment: <InputAdornment position="start"><Search fontSize="small" sx={{ color: COLORS.textSecondary }} /></InputAdornment>
+            }}
+            sx={{ bgcolor: COLORS.background, '& fieldset': { border: 'none' }, borderRadius: 2 }}
           />
+
+          {/* Filter (Visual only unless backend supports status filter) */}
           <FormControl size="small" sx={{ minWidth: 150 }}>
-            <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} displayEmpty sx={{ bgcolor: COLORS.background, '& fieldset': { border: 'none' }, borderRadius: 2 }}>
-              <MenuItem value="ALL">All Status</MenuItem><MenuItem value="ACTIVE">Active</MenuItem><MenuItem value="DROPPED">Dropped</MenuItem><MenuItem value="ALUMNI">Alumni</MenuItem>
+            <Select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              displayEmpty
+              sx={{ bgcolor: COLORS.background, '& fieldset': { border: 'none' }, borderRadius: 2 }}
+            >
+              <MenuItem value="">All Status</MenuItem>
+              <MenuItem value="ACTIVE">Active</MenuItem>
+              <MenuItem value="DROPPED">Dropped</MenuItem>
+              <MenuItem value="ALUMNI">Alumni</MenuItem>
             </Select>
           </FormControl>
         </Stack>
 
+
         <Stack direction="row" spacing={2} pb={0.5} overflow="auto">
+
           <StatsCard label="Total" value={stats.total} icon={<Groups />} color={COLORS.primary} />
+
           <StatsCard label="Boys" value={stats.boys} icon={<Male />} color={COLORS.male} />
+
           <StatsCard label="Girls" value={stats.girls} icon={<Female />} color={COLORS.female} />
+
         </Stack>
+
       </Box>
 
       {/* --- TABLE --- */}
@@ -145,11 +185,14 @@ export default function ClassDetails({ selectedClassId, classrooms, onBack, onAd
               </TableRow>
             </TableHead>
             <TableBody>
-              {isLoading ? (
-                <TableRow><TableCell colSpan={6} align="center" sx={{ py: 10 }}><CircularProgress /></TableCell></TableRow>
-              ) : filteredStudents.length > 0 ? (
-                filteredStudents.map((s: any) => (
-                  <TableRow key={s._id || s.id} hover>
+              {/* Show Loading Spinner if Fetching or Loading */}
+              {(isLoading || isFetching) ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 10 }}><CircularProgress /></TableCell>
+                </TableRow>
+              ) : students.length > 0 ? (
+                students.map((s: any) => (
+                  <TableRow key={s._id || s.id} hover onClick={() => handleStudentClick(s._id || s.id)}>
                     <TableCell>
                       <Stack direction="row" alignItems="center" spacing={1.5}>
                         <Avatar sx={{ width: 36, height: 36, bgcolor: getAvatarColor(s.name), fontSize: '0.85rem' }}>{getInitials(s.name)}</Avatar>
@@ -160,7 +203,21 @@ export default function ClassDetails({ selectedClassId, classrooms, onBack, onAd
                     <TableCell><Chip icon={s.gender.toLowerCase() === 'male' ? <Male /> : <Female />} label={s.gender} size="small" sx={{ bgcolor: alpha(s.gender.toLowerCase() === 'male' ? COLORS.male : COLORS.female, 0.1), color: s.gender.toLowerCase() === 'male' ? COLORS.male : COLORS.female }} /></TableCell>
                     <TableCell>{s.parent_name || s.parentName}</TableCell>
                     <TableCell>{s.parent_phone || s.parentPhone}</TableCell>
-                    <TableCell><Chip label={s.status} size="small" sx={{ bgcolor: alpha(s.status === 'ACTIVE' || s.status === 'active' ? COLORS.success : COLORS.error, 0.1), color: s.status === 'ACTIVE' || s.status === 'active' ? COLORS.success : COLORS.error, fontWeight: 500 }} /></TableCell>
+                    <TableCell>
+                      <Chip
+                        label={s.status}
+                        size="small"
+                        sx={{
+                          // Check both Upper and Lower case
+                          bgcolor: alpha(
+                            s.status.toLowerCase() === 'active' ? COLORS.success : COLORS.error,
+                            0.1
+                          ),
+                          color: s.status.toLowerCase() === 'active' ? COLORS.success : COLORS.error,
+                          fontWeight: 500
+                        }}
+                      />
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
@@ -171,8 +228,8 @@ export default function ClassDetails({ selectedClassId, classrooms, onBack, onAd
             </TableBody>
           </Table>
         </TableContainer>
-        
-        {/* 6. Add Pagination Component */}
+
+        {/* Pagination Component */}
         <TablePagination
           component="div"
           count={totalCount}
@@ -184,6 +241,12 @@ export default function ClassDetails({ selectedClassId, classrooms, onBack, onAd
           sx={{ borderTop: '1px solid', borderColor: COLORS.divider, bgcolor: COLORS.cardBg }}
         />
       </Box>
+      <AssignTeacherDialog
+        open={assignTeacherOpen}
+        onClose={() => setAssignTeacherOpen(false)}
+        classId={selectedClassId}
+        currentTeacherId={selectedClassroom?.teacher_id?._id || selectedClassroom?.teacherId}
+      />
     </Box>
   );
 }

@@ -53,7 +53,7 @@ export default function TeacherCard({ teacher, onToggleStatus, onClick }: Props)
           
           {/* STOP PROPAGATION on links so clicking phone/email doesn't open profile */}
           <Stack spacing={1.5} onClick={handleStopPropagation}>
-            <Tooltip title="Call"><Box component="a" href={`tel:+91${teacher.phone}`} sx={{ display: 'flex', gap: 1.5, color: 'text.secondary', textDecoration: 'none', '&:hover': { color: COLORS.tealDark } }}><Phone sx={{ fontSize: 20 }} /><Typography variant="body2">{formatPhone(teacher.phone)}</Typography></Box></Tooltip>
+            <Tooltip title="Call"><Box component="a" href={`tel:+${teacher.phone}`} sx={{ display: 'flex', gap: 1.5, color: 'text.secondary', textDecoration: 'none', '&:hover': { color: COLORS.tealDark } }}><Phone sx={{ fontSize: 20 }} /><Typography variant="body2">{formatPhone(teacher.phone)}</Typography></Box></Tooltip>
             <Tooltip title="Email"><Box component="a" href={`mailto:${teacher.email}`} sx={{ display: 'flex', gap: 1.5, color: 'text.secondary', textDecoration: 'none', '&:hover': { color: COLORS.tealDark } }}><Email sx={{ fontSize: 20 }} /><Typography variant="body2" noWrap>{teacher.email}</Typography></Box></Tooltip>
           </Stack>
 

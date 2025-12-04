@@ -18,7 +18,7 @@ export const createTeacherService = async (schoolId: string, data: CreateTeacher
 
   const teacher = await User.create({
     name: data.fullName,
-    phone: `+91${data.phone}`,
+    phone: `+${data.phone}`,
     email: data.email,
     role: "TEACHER",
     school_id: schoolId,

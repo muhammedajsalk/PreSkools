@@ -24,6 +24,7 @@ export const getStudentById = catchAsync(async (req: Request, res: Response, nex
 });
 
 export const updateStudent = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    console.log(req.body)
     const data = await updateStudentService(req.user!.school_id!, req.params.id, req.body);
     res.status(200).json({ success: true, data });
 });

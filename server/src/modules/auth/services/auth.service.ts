@@ -10,8 +10,8 @@ export const loginService = async (token: string, stepTwoPassword?: string) => {
   let user = await User.findOne({ firebase_uid: uid }).select("+password") as IUser;
 
   if (!user && phone_number) {
-    // Note: Ensure phone numbers in DB match Firebase format (e.g., +919999999999)
     user = await User.findOne({ phone: phone_number }).select("+password") as IUser;
+    
 
     if (user) {
       user.firebase_uid = uid;
@@ -61,3 +61,13 @@ export const loginService = async (token: string, stepTwoPassword?: string) => {
     user,
   };
 };
+
+export const getMeService=async(userId: string | undefined)=>{
+  const user = await User.findById(userId).select("-password").populate("school_id");
+  
+    if (!user) {
+      throw new AppError("User not found", 404)
+    }
+
+    return user
+}

@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Stack, Avatar, Box, Typography, Chip, Link, IconButton, Tooltip, TablePagination, alpha } from '@mui/material';
+import { Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Stack, Avatar, Box, Typography, Chip, Link, IconButton, Tooltip, TablePagination, alpha, CircularProgress } from '@mui/material';
 import PhoneIcon from '@mui/icons-material/Phone';
 import MaleIcon from '@mui/icons-material/Male';
 import FemaleIcon from '@mui/icons-material/Female';
@@ -9,7 +9,7 @@ import { COLORS, Student, getAvatarColor, getInitials, getStatusConfig, formatPh
 import EmptyState from './EmptyState';
 
 interface Props {
-  students: Student[];
+  students: any[]; // Changed to any[] to handle both Mock and Real data structures
   page: number;
   rowsPerPage: number;
   onPageChange: (e: unknown, newPage: number) => void;
@@ -37,34 +37,46 @@ export default function StudentTable({ students, page, rowsPerPage, onPageChange
           <TableBody>
             {students.length > 0 ? (
               students.map((student) => {
-                const statusConfig = getStatusConfig(student.status);
+                // FIX: Check for _id (Mongo) or id (Mock)
+                const studentId = student._id || student.id;
+                
+                // Handle potential missing fields safely
+                const statusConfig = getStatusConfig(student.status || 'active');
+                const className = student.className || student.class_id?.name || 'Unassigned';
+                const section = student.section || student.class_id?.section || '';
+                const admissionNo = student.admissionNo || student.admission_no || 'N/A';
+                const rollNo = student.rollNo || student.roll_no || '-';
+                const parentName = student.parentName || student.parent_name || 'N/A';
+                const parentPhone = student.parentPhone || student.parent_phone || '';
+
                 return (
-                  <TableRow key={student.id} hover sx={{ '&:hover': { bgcolor: alpha(COLORS.primary, 0.02) } }}>
+                  <TableRow key={studentId} hover sx={{ '&:hover': { bgcolor: alpha(COLORS.primary, 0.02) } }}>
                     <TableCell>
                       <Stack direction="row" alignItems="center" spacing={2}>
                         <Avatar sx={{ width: 44, height: 44, bgcolor: getAvatarColor(student.name), fontSize: '1rem', fontWeight: 600 }}>{getInitials(student.name)}</Avatar>
                         <Box>
                           <Typography variant="body2" fontWeight={600} color="text.primary">{student.name}</Typography>
-                          <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>{student.admissionNo} • Roll #{student.rollNo}</Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>{admissionNo} • Roll #{rollNo}</Typography>
                         </Box>
                       </Stack>
                     </TableCell>
-                    <TableCell><Chip label={`${student.className}-${student.section}`} size="small" sx={{ bgcolor: alpha(COLORS.primary, 0.1), color: COLORS.primaryDark, fontWeight: 600 }} /></TableCell>
+                    <TableCell><Chip label={`${className}-${section}`} size="small" sx={{ bgcolor: alpha(COLORS.primary, 0.1), color: COLORS.primaryDark, fontWeight: 600 }} /></TableCell>
                     <TableCell>
                       <Box>
-                        <Typography variant="body2" color="text.primary">{student.parentName}</Typography>
-                        <Link href={`tel:${formatPhone(student.parentPhone)}`} underline="hover" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, color: COLORS.primary, fontSize: '0.75rem' }}><PhoneIcon sx={{ fontSize: 14 }} />{student.parentPhone}</Link>
+                        <Typography variant="body2" color="text.primary">{parentName}</Typography>
+                        <Link href={`tel:${formatPhone(parentPhone)}`} underline="hover" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, color: COLORS.primary, fontSize: '0.75rem' }}><PhoneIcon sx={{ fontSize: 14 }} />{parentPhone}</Link>
                       </Box>
                     </TableCell>
                     <TableCell>
                       <Stack direction="row" alignItems="center" spacing={0.75}>
-                        {student.gender === 'male' ? <MaleIcon fontSize="small" sx={{ color: COLORS.male }} /> : <FemaleIcon fontSize="small" sx={{ color: COLORS.female }} />}
+                        {(student.gender || '').toLowerCase() === 'male' ? <MaleIcon fontSize="small" sx={{ color: COLORS.male }} /> : <FemaleIcon fontSize="small" sx={{ color: COLORS.female }} />}
                         <Typography variant="body2" color="text.secondary" sx={{ textTransform: 'capitalize' }}>{student.gender}</Typography>
                       </Stack>
                     </TableCell>
                     <TableCell><Chip label={statusConfig.label} size="small" sx={{ bgcolor: statusConfig.bgColor, color: statusConfig.color, fontWeight: 600, fontSize: '0.75rem' }} /></TableCell>
                     <TableCell align="right">
-                      <Tooltip title="More actions"><IconButton size="small" onClick={(e) => onActionMenu(e, student.id)} sx={{ color: COLORS.textSecondary }}><MoreVertIcon fontSize="small" /></IconButton></Tooltip>
+                      {/* Use corrected studentId here */}
+                      <Tooltip title="More actions"><IconButton size="small" onClick={(e) => onActionMenu(e, studentId)} sx={{ color: COLORS.textSecondary }}><MoreVertIcon fontSize="small" /></IconButton></Tooltip>
                     </TableCell>
                   </TableRow>
                 );
@@ -75,7 +87,7 @@ export default function StudentTable({ students, page, rowsPerPage, onPageChange
           </TableBody>
         </Table>
       </TableContainer>
-      {students.length > 0 && <TablePagination component="div" count={count} page={page} onPageChange={onPageChange} rowsPerPage={rowsPerPage} onRowsPerPageChange={onRowsPerPageChange} rowsPerPageOptions={[5, 10, 25, 50]} sx={{ borderTop: '1px solid', borderColor: COLORS.divider }} />}
+      {count > 0 && <TablePagination component="div" count={count} page={page} onPageChange={onPageChange} rowsPerPage={rowsPerPage} onRowsPerPageChange={onRowsPerPageChange} rowsPerPageOptions={[5, 10, 25, 50]} sx={{ borderTop: '1px solid', borderColor: COLORS.divider }} />}
     </Paper>
   );
 }

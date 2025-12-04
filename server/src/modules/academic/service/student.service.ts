@@ -6,44 +6,54 @@ import User from "../../auth/model/user.model";
 
 
 export const createStudentService = async (schoolId: string, data: any) => {
+  console.log("Received Data:", data); // Debugging
+
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
+    // 1. Validate Class
     const classObj = await ClassModel.findOne({ _id: data.class_id, school_id: schoolId }).session(session);
     if (!classObj) throw new AppError("Invalid Class ID", 400);
 
+    // 2. Validate Unique Admission No
     const exists = await StudentModel.findOne({ admission_no: data.admission_no, school_id: schoolId }).session(session);
     if (exists) throw new AppError("Admission number already exists", 400);
 
+    // ---------------------------------------------------------
+    // 3. PARENT USER LOGIC
+    // ---------------------------------------------------------
+    // Use the flat parent_phone field sent from frontend
     let parentUser = await User.findOne({ phone: data.parent_phone }).session(session);
 
     if (!parentUser) {
+      // Create Placeholder Parent User
       const [newParent] = await User.create([{
         name: data.parent_name,
-        phone: data.parent_phone,
+        phone: +data.parent_phone,
+        email: data.parent_email, // ✅ ADDED: Save Email to User Account
         role: "PARENT",
         school_id: schoolId,
-        firebase_uid: undefined,
+        firebase_uid: undefined, // Will claim later via OTP
         isActive: false,
       }], { session });
       
       parentUser = newParent;
-    } else {
-      
-    }
-
+    } 
+    
+    // ---------------------------------------------------------
+    // 4. CREATE STUDENT
+    // ---------------------------------------------------------
     const [newStudent] = await StudentModel.create([{
-      ...data,
+      ...data, // This spreads the nested objects (parents, medical_info, etc.)
       school_id: schoolId,
-      parent_ids: [parentUser._id],
+      parent_ids: [parentUser._id], // Link User to Student
     }], { session });
 
     await session.commitTransaction();
     return newStudent;
 
   } catch (error) {
-
     await session.abortTransaction();
     throw error;
   } finally {
@@ -97,13 +107,21 @@ export const getStudentByIdService = async (schoolId: string, studentId: string)
 };
 
 export const updateStudentService = async (schoolId: string, studentId: string, data: any) => {
+  
   const updated = await StudentModel.findOneAndUpdate(
-    { _id: studentId, school_id: schoolId },
+    { _id: studentId, school_id: schoolId }, // Ensure Tenant Isolation
     data,
-    { new: true }
+    { 
+      new: true,            // Return the updated document
+      runValidators: true   // <--- CRITICAL: Enforce Schema Rules (e.g. Enum values)
+    }
   );
 
-  if (!updated) throw new AppError("Student not found", 404);
+  // <--- CRITICAL: Throw error if not found
+  if (!updated) {
+    throw new AppError("Student not found", 404);
+  }
+
   return updated;
 };
 

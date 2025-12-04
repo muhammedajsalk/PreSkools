@@ -12,7 +12,7 @@ const getGreeting = () => {
   return h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening';
 };
 
-export default function WelcomeBanner() {
+export default function WelcomeBanner({ name }: { name?: string }) {
   // 2. Create state for the date string
   const [currentDate, setCurrentDate] = useState<string>('');
 
@@ -37,8 +37,8 @@ export default function WelcomeBanner() {
           <Stack direction="row" alignItems="center" spacing={2.5}>
             <Avatar sx={{ width: { xs: 56, md: 72 }, height: { xs: 56, md: 72 }, backgroundColor: 'rgba(255, 255, 255, 0.2)', color: 'white', fontSize: { xs: '1.25rem', md: '1.5rem' }, fontWeight: 700, border: '3px solid rgba(255, 255, 255, 0.3)' }}>{MOCK_DATA.principal.avatar}</Avatar>
             <Box>
-              <Typography variant="h4" sx={{ color: 'white', fontWeight: 800, letterSpacing: '-0.5px', fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' } }}>{getGreeting()}, {MOCK_DATA.principal.name}! 👋</Typography>
-              <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.85)', mt: 0.5 }}>Welcome back to {MOCK_DATA.principal.schoolName}</Typography>
+              <Typography variant="h4" sx={{ color: 'white', fontWeight: 800, letterSpacing: '-0.5px', fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' } }}>{getGreeting()}, Admin! 👋</Typography>
+              <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.85)', mt: 0.5 }}>Welcome back to {name}</Typography>
               <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 1 }}>
                 <CalendarMonthIcon sx={{ fontSize: 16, color: 'rgba(255, 255, 255, 0.7)' }} />
                 

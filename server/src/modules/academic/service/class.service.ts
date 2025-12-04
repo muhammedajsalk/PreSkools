@@ -4,7 +4,8 @@ import { StudentModel } from "../model/student.model";
 import { AppError } from "../../../utils/AppError";
 
 export const createClassService = async (schoolId: string, data: any) => {
-  const exists = await ClassModel.findOne({ name: data.name, school_id: schoolId });
+  console.log(data)
+  const exists = await ClassModel.findOne({name:data.name, section: data.section, school_id: schoolId });
   if (exists) throw new AppError("Class with this name already exists", 400);
 
   return await ClassModel.create({ ...data, school_id: schoolId });

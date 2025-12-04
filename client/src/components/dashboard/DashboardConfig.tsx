@@ -13,6 +13,7 @@ import CakeIcon from '@mui/icons-material/Cake';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
+import SchoolIcon from '@mui/icons-material/School';
 
 // --- THEME ---
 export const brandColors = {
@@ -61,10 +62,11 @@ export const MOCK_DATA = {
   quickActions: [
     { id: '1', label: 'Record Fee', icon: <ReceiptLongIcon />, color: brandColors.stats.green.main, bgColor: brandColors.stats.green.light, badge: 5 },
     { id: '2', label: 'Send Notice', icon: <CampaignIcon />, color: brandColors.stats.orange.main, bgColor: brandColors.stats.orange.light },
-    { id: '3', label: 'Add Student', icon: <PersonAddIcon />, color: brandColors.stats.blue.main, bgColor: brandColors.stats.blue.light },
+    { id: '3', label: 'Manage Student', icon: <PersonAddIcon />, color: brandColors.stats.blue.main, bgColor: brandColors.stats.blue.light },
     { id: '4', label: 'View Gallery', icon: <CollectionsIcon />, color: brandColors.stats.purple.main, bgColor: brandColors.stats.purple.light, badge: 12 },
     { id: '5', label: 'Take Attendance', icon: <AssignmentTurnedInIcon />, color: brandColors.stats.teal.main, bgColor: brandColors.stats.teal.light },
     { id: '6', label: 'Manage Staff', icon: <GroupAddIcon />, color: brandColors.stats.pink.main, bgColor: brandColors.stats.pink.light },
+    { id: '7', label: 'Manage Academy', icon: <SchoolIcon />, color: brandColors.stats.teal.dark, bgColor: brandColors.stats.teal.light },
   ] as QuickAction[],
   upcomingEvents: [
     { id: '1', title: "Aarav's Birthday", date: 'Tomorrow', type: 'birthday', icon: <CakeIcon /> },

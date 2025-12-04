@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { createActivity, getStudentFeed } from "../controller/activity.controller";
+import { createActivity, getClassHistory, getStudentFeed } from "../controller/activity.controller";
 import { protect, restrictTo } from "../../../middleware/auth";
 import validate from "../../../middleware/validate";
-import { createActivitySchema } from "../validation/activity.validation"
+import { createActivitySchema, getHistorySchema } from "../validation/activity.validation"
 
 const router = Router();
 
@@ -21,6 +21,13 @@ router.get(
   "/feed/:studentId",
   restrictTo("PARENT", "SCHOOL_ADMIN", "TEACHER"),
   getStudentFeed
+);
+
+router.get(
+  "/history",
+  restrictTo("TEACHER", "SCHOOL_ADMIN"),
+  validate(getHistorySchema,"query"), // Validate query params
+  getClassHistory
 );
 
 export default router;

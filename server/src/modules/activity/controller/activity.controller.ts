@@ -30,3 +30,14 @@ export const getStudentFeed = catchAsync(async (req: Request, res: Response) => 
     data: result
   });
 });
+
+export const getClassHistory = catchAsync(async (req: Request, res: Response) => {
+  // Pass req.user (for context) and req.query (for filters)
+  const data = await Service.getClassHistoryService(req.user, req.query);
+
+  res.status(200).json({
+    success: true,
+    count: data.length,
+    data,
+  });
+});

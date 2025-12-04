@@ -1,19 +1,31 @@
 import { Request, Response, NextFunction } from "express";
-import Joi, { Schema } from "joi";
+import Joi from "joi";
 import { AppError } from "../utils/AppError";
 
-const validate = (schema: Schema) => {
+// Default to 'body' if no source is specified
+type ValidationSource = "body" | "query" | "params";
+
+const validate = (schema: Joi.ObjectSchema, source: ValidationSource = "body") => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const { error } = schema.validate(req.body, {
-      abortEarly: false, 
-      stripUnknown: true,
+    // 1. Pick the data source
+    const data = req[source];
+
+    // 2. Validate
+    const { error, value } = schema.validate(data, {
+      abortEarly: false, // Show all errors, not just the first
+      stripUnknown: true, // Remove fields not in the schema
+      convert: true, // Convert "123" to 123
     });
 
     if (error) {
-      const message = error.details.map((detail) => detail.message).join(", ");
-      return next(new AppError(message, 400));
+      const errorMessage = error.details
+        .map((detail) => detail.message)
+        .join(", ");
+      return next(new AppError(errorMessage, 400));
     }
 
+    // 3. Replace request data with validated/sanitized data
+    req[source] = value;
     next();
   };
 };

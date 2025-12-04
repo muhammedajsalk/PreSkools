@@ -1,4 +1,7 @@
+import { AppError } from "../../../utils/AppError";
+import { ClassModel } from "../../academic/model/class.model";
 import Activity from "../model/activity.model";
+import dayjs from "dayjs";
 
 interface CreateActivityInput {
   school_id: string;
@@ -45,4 +48,70 @@ export const getStudentFeedService = async (studentId: string, page: number = 1,
     page,
     totalPages: Math.ceil(total / limit) 
   };
+};
+
+
+
+
+export const getClassHistoryService = async (user: any, query: any) => {
+    
+  // 1. Resolve Class ID (Same as before)
+  let classId = query.class_id;
+  if (user.role === "TEACHER") {
+    const teacherClass = await ClassModel.findOne({ teacher_id: user.id });
+    if (!teacherClass) throw new AppError("You are not assigned to any class.", 400);
+    classId = teacherClass._id;
+  }
+  if (!classId && user.role === "SCHOOL_ADMIN") {
+    throw new AppError("Class ID is required.", 400);
+  }
+
+  // 2. Build Filter
+  const filter: any = {
+    school_id: user.school_id,
+    class_id: classId,
+  };
+
+  // Date Filter
+  if (query.date) {
+    const startOfDay = dayjs(query.date).startOf("day").toDate();
+    const endOfDay = dayjs(query.date).endOf("day").toDate();
+    filter.date = { $gte: startOfDay, $lte: endOfDay };
+  }
+
+  // Student Filter
+  if (query.student_id && query.student_id !== "all") {
+    filter.student_id = query.student_id;
+  }
+
+  // 3. ✅ UPDATED: Activity Type Filter (Support ALL Types)
+  if (query.type && query.type !== "all") {
+    const typeMapping: Record<string, string[]> = {
+      // Basic
+      meals: ["MEAL", "DRINK"],
+      naps: ["NAP"],
+      photos: ["PHOTO"],
+      
+      // Added New Types
+      hygiene: ["HYGIENE"],    // Maps to 'hygiene' chip
+      learning: ["LEARNING"],  // Maps to 'learning' chip
+      notes: ["NOTE"],         // Maps to 'notes' chip
+    };
+
+    // If the query matches a key (e.g., 'learning'), use the array
+    if (typeMapping[query.type]) {
+      filter.type = { $in: typeMapping[query.type] };
+    } else {
+      // Fallback: If they sent a raw ENUM like "MEAL" directly
+      filter.type = query.type;
+    }
+  }
+
+  // 4. Execute Query
+  const activities = await Activity.find(filter)
+    .populate("student_id", "name avatar gender")
+    .populate("teacher_id", "name")
+    .sort({ createdAt: -1 });
+
+  return activities;
 };

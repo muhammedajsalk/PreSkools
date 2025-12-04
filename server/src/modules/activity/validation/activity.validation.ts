@@ -40,3 +40,25 @@ export const createActivitySchema = Joi.object({
     }).required()
   }).required()
 });
+
+
+export const getHistorySchema = Joi.object({
+  // Allow date to be a string or date object
+  date: Joi.alternatives().try(Joi.date().iso(), Joi.string()).required(),
+  
+  // Allow "all" and uppercase/lowercase variants
+  type: Joi.string().valid(
+    "all", "ALL", 
+    "meals", "MEAL", 
+    "naps", "NAP", 
+    "photos", "PHOTO", 
+    "hygiene", "HYGIENE", 
+    "learning", "LEARNING", 
+    "notes", "NOTE"
+  ).default("all"),
+
+  // Allow these to be empty strings or null
+  student_id: Joi.string().allow("", null).optional(),
+  class_id: Joi.string().allow("", null).optional(),
+}).unknown(true);
+

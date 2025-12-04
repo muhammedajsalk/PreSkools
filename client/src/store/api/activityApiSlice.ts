@@ -31,10 +31,20 @@ export const activityApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+    getClassHistory: builder.query({
+      query: (params) => ({
+        url: '/activity/history',
+        params: params, // { date, student_id, type }
+      }),
+      // Provide specific tags so we can invalidate them later if needed
+      providesTags: ['Activity'], 
+    }),
+
   }),
 });
 
 export const { 
   useCreateActivityMutation,
-  useGetStudentFeedQuery 
+  useGetStudentFeedQuery ,
+  useGetClassHistoryQuery
 } = activityApiSlice;

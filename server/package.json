@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "seed": "ts-node src/scripts/seed.ts",
-    "seed:attendance": "ts-node src/scripts/seed-attendance.ts"
+    "seed:attendance": "ts-node src/scripts/seed-attendance.ts",
+    "seed:activities": "ts-node src/scripts/seed-activities.ts"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

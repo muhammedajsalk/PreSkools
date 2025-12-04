@@ -12,7 +12,7 @@ export const createActivitySchema = Joi.object({
   data: Joi.object().when('type', {
     is: 'MEAL',
     then: Joi.object({
-      food_item: Joi.string().required(),
+      food_item: Joi.string().allow("").optional(),
       quantity: Joi.string().valid("ALL", "HALF", "NONE", "EXTRA").required(),
       description: Joi.string().allow("").optional(),
     }).required()

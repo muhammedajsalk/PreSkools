@@ -1,95 +1,168 @@
 'use client';
+
 import React, { useState, useMemo, useCallback } from 'react';
-import { Box, Stack, Typography, IconButton, FormControlLabel, Switch, Snackbar, Alert, Card, CardContent, alpha } from '@mui/material';
+import {
+  Box, Stack, Typography, IconButton, FormControlLabel, Switch, Card, CardContent, alpha, CircularProgress, Button
+} from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Link from 'next/link';
-import { COLORS, ACTIVITY_CONFIGS, MOCK_STUDENTS, CLASS_INFO, ActivityType, getCurrentTime, MealFormData, NapFormData,HygieneFormData,LearningFormData,PhotoFormData } from '../../../../src/components/teacher/activity/ActivityConfig';
-import ActivitySelector from '../../../../src/components/teacher/activity/ActivitySelector';
-import StudentSelector from '../../../../src/components/teacher/activity/StudentSelector';
-import { MealForm, NapForm,HygieneForm,LearningForm,PhotoForm } from '../../../../src/components/teacher/activity/ActivityForms';
-import BottomActionBar from '../../../../src/components/teacher/activity/BottomActionBar';
+import { toast } from 'sonner'; // Use Sonner for better toasts
+
+// Config & Components
+import {
+  COLORS, ACTIVITY_CONFIGS, CLASS_INFO, ActivityType, getCurrentTime,
+  MealFormData, NapFormData, HygieneFormData, LearningFormData, PhotoFormData
+} from '@/src/components/teacher/activity/ActivityConfig';
+import ActivitySelector from '@/src/components/teacher/activity/ActivitySelector';
+import StudentSelector from '@/src/components/teacher/activity/StudentSelector';
+import BottomActionBar from '@/src/components/teacher/activity/BottomActionBar';
+import { MealForm, NapForm, HygieneForm, LearningForm, PhotoForm } from '@/src/components/teacher/activity/ActivityForms';
+
+// 1. Import API Hooks
+import { useCreateActivityMutation } from '@/src/store/api/activityApiSlice';
+import { useGetClassesQuery, useGetStudentsQuery } from '@/src/store/api/academicApiSlice';
+import { useGetMeQuery } from '@/src/store/api/authApiSlice';
 
 export default function TeacherActivityLogPage() {
-  // --- 1. UI State ---
+  // --- API Hooks ---
+  const [createActivity, { isLoading: isSaving }] = useCreateActivityMutation();
+  const { data: userData } = useGetMeQuery(undefined);
+  const { data: classData } = useGetClassesQuery();
+
+  // Find Teacher's Class
+  const myClass = useMemo(() => {
+    if (!userData || !classData) return null;
+    // Check if teacher is assigned to any class
+    return classData.data.find((c: any) =>
+      c.teacher_id?._id === userData.data._id || c.teacher_id === userData.data._id
+    );
+  }, [userData, classData]);
+
+  // Fetch REAL Students
+  const { data: studentData, isLoading: isLoadingStudents } = useGetStudentsQuery(
+    { class_id: myClass?._id, limit: 100 },
+    { skip: !myClass }
+  );
+  const students = studentData?.students || [];
+
+  // --- State ---
   const [selectedActivity, setSelectedActivity] = useState<ActivityType>('meal');
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ 
-    open: false, message: '', severity: 'success' 
-  });
 
-  // --- 2. Form Data State (One state per activity type) ---
+  // Form Data State
   const [mealData, setMealData] = useState<MealFormData>({ foodItem: '', quantity: 'all', notes: '' });
   const [napData, setNapData] = useState<NapFormData>({ startTime: getCurrentTime(), duration: 60, quality: 'good' });
   const [hygieneData, setHygieneData] = useState<HygieneFormData>({ type: 'handwash', notes: '' });
   const [learningData, setLearningData] = useState<LearningFormData>({ activity: '', participation: 'active', notes: '' });
   const [photoData, setPhotoData] = useState<PhotoFormData>({ caption: '', photos: [] });
 
-  // --- 3. Computed Values ---
-  const currentConfig = useMemo(() => 
-    ACTIVITY_CONFIGS.find((a) => a.id === selectedActivity)!, 
-  [selectedActivity]);
+  const currentConfig = useMemo(() => ACTIVITY_CONFIGS.find((a) => a.id === selectedActivity)!, [selectedActivity]);
 
-  // --- 4. Handlers ---
+  // --- Handlers ---
 
-  // Handle toggling individual students
   const handleStudentToggle = useCallback((id: string) => {
     setSelectedStudents(prev => {
       const isSelected = prev.includes(id);
-      
       if (isSelected) {
-        // Unselect
         setSelectAll(false);
         return prev.filter(s => s !== id);
-      } else {
-        // Select
-        const newSelection = [...prev, id];
-        // Check if all are now selected
-        if (newSelection.length === MOCK_STUDENTS.length) {
-          setSelectAll(true);
-        }
-        return newSelection;
       }
+      const newSel = [...prev, id];
+      if (newSel.length === students.length) setSelectAll(true);
+      return newSel;
     });
-  }, []);
+  }, [students]);
 
-  // Handle "Select All" Switch
   const handleSelectAll = useCallback(() => {
     if (selectAll) {
       setSelectedStudents([]);
       setSelectAll(false);
     } else {
-      setSelectedStudents(MOCK_STUDENTS.map(s => s.id));
+      // Map _id from real students
+      setSelectedStudents(students.map((s: any) => s._id));
       setSelectAll(true);
     }
-  }, [selectAll]);
+  }, [selectAll, students]);
 
-  // Handle Submit Button
   const handleSubmit = async () => {
-    if (selectedStudents.length === 0) return;
+    if (selectedStudents.length === 0) {
+      toast.error("Please select at least one student");
+      return;
+    }
+    if (!myClass) {
+      toast.error("No class assigned to you");
+      return;
+    }
 
-    setSaving(true);
-    
-    // Simulate API Call
-    await new Promise(r => setTimeout(r, 1500));
-    
-    // In real app: POST /api/activity/log with formData
-    console.log(`Logged ${selectedActivity} for`, selectedStudents);
+    try {
+      // Prepare Payload based on Activity Type
+      let activityData: any = {};
 
-    setSaving(false);
-    setSnackbar({ 
-      open: true, 
-      message: `${currentConfig.label} Logged Successfully!`, 
-      severity: 'success' 
-    });
-    
-    // Optional: Reset selection after submit
-    setSelectedStudents([]);
-    setSelectAll(false);
+      switch (selectedActivity) {
+        case 'meal':
+          activityData = {
+            food_item: mealData.foodItem,
+            quantity: mealData.quantity.toUpperCase(), // Backend expects uppercase enum
+            description: mealData.notes
+          };
+          break;
+        case 'nap':
+          activityData = {
+            start_time: napData.startTime,
+            duration: Number(napData.duration),
+            quality: napData.quality.toUpperCase(),
+            description: `Slept for ${napData.duration} mins`
+          };
+          break;
+        case 'hygiene':
+          activityData = {
+            subtype: hygieneData.type.toUpperCase(), // DIAPER / POTTY / HANDWASH
+            description: hygieneData.notes
+          };
+          break;
+        case 'learning':
+          if (!learningData.activity) { toast.error("Activity name is required"); return; }
+          activityData = {
+            title: learningData.activity,
+            description: `${learningData.participation} participation. ${learningData.notes}`
+          };
+          break;
+        case 'photo':
+          activityData = {
+            title: "Class Photo",
+            description: photoData.caption,
+            // ✅ FIX: Use the state variable that holds the real URLs
+            media_urls: photoData.photos
+          };
+          break;
+      }
+
+      // Call API
+      await createActivity({
+        student_ids: selectedStudents,
+        class_id: myClass._id,
+        type: selectedActivity.toUpperCase() as any,
+        date: new Date().toISOString(),
+        data: activityData
+      }).unwrap();
+
+      toast.success(`${currentConfig.label} Logged Successfully! 🎉`);
+
+      // Reset Selection
+      setSelectedStudents([]);
+      setSelectAll(false);
+
+      // Reset form data (optional, resets specific form)
+      if (selectedActivity === 'meal') setMealData({ foodItem: '', quantity: 'all', notes: '' });
+
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.data?.message || "Failed to log activity");
+    }
   };
 
-  // --- 5. Render Logic ---
+  // --- Render Logic ---
   const renderForm = () => {
     const color = currentConfig.color;
     switch (selectedActivity) {
@@ -102,56 +175,58 @@ export default function TeacherActivityLogPage() {
     }
   };
 
+  if (isLoadingStudents) {
+    return <Box sx={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><CircularProgress sx={{ color: COLORS.primary }} /></Box>;
+  }
+
+  if (!myClass) {
+    return (
+      <Box sx={{ p: 5, textAlign: 'center', mt: 10 }}>
+        <Typography variant="h6" color="textSecondary">No Class Assigned</Typography>
+        <Typography variant="body2" color="textSecondary">Please contact the admin to assign you to a class.</Typography>
+        <Button component={Link} href="/teacher" sx={{ mt: 2 }} variant="outlined">Back to Dashboard</Button>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ bgcolor: COLORS.background, minHeight: '100vh', pb: { xs: 20, sm: 16 } }}>
-      
-      {/* --- Header (Sticky) --- */}
+
+      {/* Header */}
       <Box sx={{ bgcolor: COLORS.cardBg, borderBottom: '1px solid', borderColor: COLORS.divider, position: 'sticky', top: 0, zIndex: 30 }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: { xs: 2, sm: 3 }, py: 2 }}>
           <Stack direction="row" alignItems="center" spacing={1}>
-            <IconButton component={Link} href="/teacher" sx={{ color: COLORS.textSecondary }}>
-              <ArrowBackIcon />
-            </IconButton>
+            <IconButton component={Link} href="/teacher" sx={{ color: COLORS.textSecondary }}><ArrowBackIcon /></IconButton>
             <Box>
               <Typography variant="h6" fontWeight={700} color="text.primary">Log Activity</Typography>
-              <Typography variant="caption" color="text.secondary">{CLASS_INFO.name}-{CLASS_INFO.section}</Typography>
+              <Typography variant="caption" color="text.secondary">{myClass?.name}-{myClass?.section}</Typography>
             </Box>
           </Stack>
-          
-          <FormControlLabel 
-            control={
-              <Switch 
-                checked={selectAll} 
-                onChange={handleSelectAll} 
-                sx={{ 
-                  '& .MuiSwitch-switchBase.Mui-checked': { color: currentConfig.color }, 
-                  '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: currentConfig.color } 
-                }} 
-              />
-            } 
-            label={<Typography variant="caption" fontWeight={600}>All</Typography>} 
-            labelPlacement="start" 
-            sx={{ mr: 0 }} 
+
+          <FormControlLabel
+            control={<Switch checked={selectAll} onChange={handleSelectAll} sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: currentConfig.color }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: currentConfig.color } }} />}
+            label={<Typography variant="caption" fontWeight={600}>All</Typography>}
+            labelPlacement="start" sx={{ mr: 0 }}
           />
         </Stack>
-        
-        {/* Horizontal Activity List */}
         <ActivitySelector selectedActivity={selectedActivity} onSelect={setSelectedActivity} />
       </Box>
 
-      {/* --- Student Grid --- */}
-      <StudentSelector 
-        selectedStudents={selectedStudents} 
-        onToggle={handleStudentToggle} 
-        activeColor={currentConfig.color} 
+      {/* Pass REAL students to selector */}
+      <StudentSelector
+        selectedStudents={selectedStudents}
+        onToggle={handleStudentToggle}
+        activeColor={currentConfig.color}
+        // We map _id to id for the UI component compatibility
+        // @ts-ignore
+        students={students.map((s: any) => ({ ...s, id: s._id, name: s.name, avatar: s.avatar || '', gender: s.gender }))}
       />
 
-      {/* --- Dynamic Form Card --- */}
       <Box sx={{ px: { xs: 2, sm: 3 }, pb: 2 }}>
         <Typography variant="subtitle2" color="text.secondary" fontWeight={600} sx={{ mb: 2 }}>
           {currentConfig.label.toUpperCase()} DETAILS
         </Typography>
-        
+
         <Card elevation={0} sx={{ border: '2px solid', borderColor: alpha(currentConfig.color, 0.3), borderRadius: 3, bgcolor: alpha(currentConfig.bgColor, 0.3) }}>
           <CardContent sx={{ p: 2.5 }}>
             {renderForm()}
@@ -159,29 +234,16 @@ export default function TeacherActivityLogPage() {
         </Card>
       </Box>
 
-      {/* --- Bottom Sticky Footer --- */}
-      <BottomActionBar 
-        selectedStudents={selectedStudents} 
-        onSubmit={handleSubmit} 
-        saving={saving} 
-        canSubmit={selectedStudents.length > 0} 
-        activityLabel={currentConfig.label} 
-        activityIcon={currentConfig.icon} 
-        color={currentConfig.color} 
+      <BottomActionBar
+        selectedStudents={selectedStudents}
+        onSubmit={handleSubmit}
+        saving={isSaving}
+        canSubmit={selectedStudents.length > 0}
+        activityLabel={currentConfig.label}
+        activityIcon={currentConfig.icon}
+        color={currentConfig.color}
+        students={students}
       />
-
-      {/* --- Feedback Snackbar --- */}
-      <Snackbar 
-        open={snackbar.open} 
-        autoHideDuration={4000} 
-        onClose={() => setSnackbar({ ...snackbar, open: false })} 
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        <Alert severity={snackbar.severity} sx={{ width: '100%', borderRadius: 2 }}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-
     </Box>
   );
 }

@@ -41,7 +41,15 @@ export const attendanceApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: ['Attendance'],
     }),
 
+    getAttendanceAnalytics: builder.query({
+      query: (params) => ({
+        url: '/attendance/analytics',
+        params, // { timeRange: 'week', class_id: '...' }
+      }),
+      providesTags: ['Attendance'],
+    }),
+
   }),
 });
 
-export const { useGetAttendanceQuery, useMarkAttendanceMutation } = attendanceApiSlice;
+export const { useGetAttendanceQuery, useMarkAttendanceMutation,useGetAttendanceAnalyticsQuery } = attendanceApiSlice;

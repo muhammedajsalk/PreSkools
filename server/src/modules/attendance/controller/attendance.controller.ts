@@ -27,3 +27,16 @@ export const getAttendance = catchAsync(async (req: Request, res: Response) => {
 
   res.status(200).json({ success: true, data });
 });
+
+
+export const getAnalytics = catchAsync(async (req: Request, res: Response) => {
+  const data = await Service.getAttendanceAnalyticsService(
+    req.user!.school_id!,
+    req.query
+  );
+  
+  res.status(200).json({
+    success: true,
+    data
+  });
+});

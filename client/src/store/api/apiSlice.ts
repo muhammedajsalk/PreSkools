@@ -16,6 +16,6 @@ export const apiSlice = createApi({
     },
   }),
   // 2. Define Tags for Caching (Auto-Refetching)
-  tagTypes: ['User', 'Student', 'Class', 'School', 'Teacher'],
+  tagTypes: ['User', 'Student', 'Class', 'School', 'Teacher','Attendance'],
   endpoints: (builder) => ({}), // We inject endpoints in other files
 });

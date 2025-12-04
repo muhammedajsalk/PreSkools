@@ -10,6 +10,7 @@ import schoolRoute from './modules/school/routes/school.routes'
 import classRoute from './modules/academic/routes/class.routes'
 import studentRoute from './modules/academic/routes/student.route'
 import teacherRoutes from './modules/academic/routes/teacher.routes'
+import attendanceRoutes from "./modules/attendance/routes/attendance.routes";
 
 
 const app: Application = express();
@@ -25,6 +26,7 @@ app.use("/api/school",schoolRoute)
 app.use("/api/class",classRoute)
 app.use("/api/student",studentRoute)
 app.use("/api/teachers", teacherRoutes);
+app.use("/api/attendance", attendanceRoutes);
 
 
 app.all("*", (req, res, next) => {

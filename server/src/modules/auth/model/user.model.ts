@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 export interface IUser extends Document {
   name: string;
   phone: string;
+  email?: string;
   firebase_uid?: string;
   role: "SUPER_ADMIN" | "SCHOOL_ADMIN" | "TEACHER" | "PARENT";
   school_id?: mongoose.Types.ObjectId;

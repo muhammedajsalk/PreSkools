@@ -10,6 +10,7 @@ export const COLORS = {
   success: '#48BB78', error: '#F56565', info: '#4299E1', warning: '#ECC94B',
   purple: '#9F7AEA', pink: '#ED64A6', divider: '#E2E8F0',
   napTime: '#667EEA', playTime: '#48BB78', learnTime: '#ED8936', mealTime: '#F56565',
+  infoLight: '#BEE3F8',
 };
 
 // --- TYPES ---

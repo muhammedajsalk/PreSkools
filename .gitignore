@@ -23,3 +23,5 @@ Thumbs.db
 .idea/
 
 server/src/config/serviceAccountKey.json
+
+server/src/scripts/

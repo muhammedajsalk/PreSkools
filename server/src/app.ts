@@ -11,6 +11,7 @@ import classRoute from './modules/academic/routes/class.routes'
 import studentRoute from './modules/academic/routes/student.route'
 import teacherRoutes from './modules/academic/routes/teacher.routes'
 import attendanceRoutes from "./modules/attendance/routes/attendance.routes";
+import activityRoutes from "./modules/activity/routes/activity.routes";
 
 
 const app: Application = express();
@@ -27,6 +28,7 @@ app.use("/api/class",classRoute)
 app.use("/api/student",studentRoute)
 app.use("/api/teachers", teacherRoutes);
 app.use("/api/attendance", attendanceRoutes);
+app.use("/api/activity", activityRoutes);
 
 
 app.all("*", (req, res, next) => {

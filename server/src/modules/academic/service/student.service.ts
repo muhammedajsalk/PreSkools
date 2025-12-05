@@ -3,6 +3,7 @@ import { StudentModel } from "../model/student.model";
 import { AppError } from "../../../utils/AppError";
 import mongoose from "mongoose";
 import User from "../../auth/model/user.model";
+import School from '../../school/model/school.model'
 
 
 export const createStudentService = async (schoolId: string, data: any) => {
@@ -12,6 +13,9 @@ export const createStudentService = async (schoolId: string, data: any) => {
   session.startTransaction();
 
   try {
+
+    const school = await School.findById(schoolId);
+    if (!school) throw new AppError("School context required", 400);
     // 1. Validate Class
     const classObj = await ClassModel.findOne({ _id: data.class_id, school_id: schoolId }).session(session);
     if (!classObj) throw new AppError("Invalid Class ID", 400);
@@ -44,6 +48,22 @@ export const createStudentService = async (schoolId: string, data: any) => {
     // ---------------------------------------------------------
     // 4. CREATE STUDENT
     // ---------------------------------------------------------
+    const currentStudentCount = await StudentModel.countDocuments({ 
+        school_id: schoolId,
+        status: 'ACTIVE' 
+    });
+
+
+    const STUDENT_LIMIT = { SEED: 50, SPROUT: 150, BLOOM: 99999 };
+    const maxStudents = STUDENT_LIMIT[school.subscription_plan];
+
+    if (currentStudentCount >= maxStudents) {
+        throw new AppError(
+            `Quota limit reached (${maxStudents} students). Upgrade your plan to add more.`, 
+            403
+        );
+    }
+
     const [newStudent] = await StudentModel.create([{
       ...data, // This spreads the nested objects (parents, medical_info, etc.)
       school_id: schoolId,

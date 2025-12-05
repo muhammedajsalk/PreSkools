@@ -53,6 +53,8 @@ export const createSchoolService = async (payload: CreateSchoolPayload) => {
       email,
       admin_id: newAdmin._id,
       subscription_plan: plan || "SEED",
+      subscription_status: 'TRIAL', 
+      plan_start_date: new Date(),
     });
 
     newAdmin.school_id = school._id as mongoose.Types.ObjectId; 

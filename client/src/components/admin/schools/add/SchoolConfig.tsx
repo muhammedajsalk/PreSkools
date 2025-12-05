@@ -30,19 +30,19 @@ export interface FormErrors {
 }
 
 export interface PlanOption {
-  id: PlanType;
-  name: string;
-  emoji: string;
-  tagline: string;
-  description: string;
-  features: string[];
-  price: string;
-  priceNote: string;
-  color: string;
-  lightColor: string;
-  borderColor: string;
-  icon: React.ReactNode;
-  popular?: boolean;
+    id: PlanType;
+    name: string;
+    emoji: string;
+    tagline: string;
+    description: string;
+    features: string[];
+    price: string;
+    priceNote: string;
+    color: string;
+    lightColor: string;
+    borderColor: string;
+    icon: React.ReactNode;
+    popular?: boolean;
 }
 
 // --- THEME ---
@@ -60,22 +60,64 @@ export const steps = [
 ];
 
 export const planOptions: PlanOption[] = [
-  {
-    id: 'SEED', name: 'Seed', emoji: '🌱', tagline: 'Basic Digitization',
-    description: 'Perfect for small schools just starting their digital journey.',
-    features: ['Student Management (up to 50)', 'Basic Attendance Tracking', 'Parent Notifications', 'Simple Fee Collection'],
-    price: '₹2,999', priceNote: 'per month', color: '#6B7280', lightColor: '#F3F4F6', borderColor: '#D1D5DB', icon: <SpaIcon />,
-  },
-  {
-    id: 'SPROUT', name: 'Sprout', emoji: '🌿', tagline: 'Standard Management',
-    description: 'Growing schools that need comprehensive management tools.',
-    features: ['Everything in Seed', 'Student Limit: 150', 'Advanced Fee Management', 'Photo & Video Sharing', 'Parent App Access'],
-    price: '₹5,999', priceNote: 'per month', color: '#059669', lightColor: '#D1FAE5', borderColor: '#6EE7B7', icon: <LocalFloristIcon />, popular: true,
-  },
-  {
-    id: 'BLOOM', name: 'Bloom', emoji: '🌸', tagline: 'Full Automation',
-    description: 'Enterprise-grade solution for established institutions.',
-    features: ['Everything in Sprout', 'Unlimited Students', 'Advanced Analytics', 'API Access', '24/7 Phone Support'],
-    price: '₹9,999', priceNote: 'per month', color: '#7C3AED', lightColor: '#EDE9FE', borderColor: '#C4B5FD', icon: <FilterVintageIcon />,
-  },
+    {
+        id: 'SEED', 
+        name: 'Seed', 
+        emoji: '🌱', 
+        tagline: 'Basic Digitization',
+        description: 'Perfect for small schools just starting their digital journey.',
+        features: [
+            'Student & Class Management', 
+            'Basic Attendance Tracking', 
+            'Parent Feed Access'
+        ],
+        price: '$49', 
+        priceNote: 'per month (Up to 50 Students)', 
+        color: '#6B7280', 
+        lightColor: '#F3F4F6', 
+        borderColor: '#D1D5DB', 
+        // Note: Icon assumed to be React.createElement(SpaIcon) in your file
+        icon: 'SpaIcon', 
+    },
+    {
+        id: 'SPROUT', 
+        name: 'Sprout', 
+        emoji: '🌿', 
+        tagline: 'Standard Management Suite',
+        description: 'Growing schools needing core administrative and engagement tools.',
+        features: [
+            'Everything in Seed', 
+            'Student Cap: 150', 
+            '✅ Fees & Billing Module', 
+            '✅ Attendance Analytics', 
+            '✅ Photo & Video Sharing'
+        ],
+        price: '$99', 
+        priceNote: 'per month (Up to 150 Students)', 
+        color: '#059669', 
+        lightColor: '#D1FAE5', 
+        borderColor: '#6EE7B7', 
+        icon: 'LocalFloristIcon', 
+        popular: true,
+    },
+    {
+        id: 'BLOOM', 
+        name: 'Bloom', 
+        emoji: '🌸', 
+        tagline: 'Enterprise & Full Automation',
+        description: 'Solution for large institutions requiring advanced control and support.',
+        features: [
+            'Everything in Sprout', 
+            'Unlimited Students', 
+            '✅ Document Storage', 
+            '✅ Priority Support', 
+            '✅ Data Export & Analytics'
+        ],
+        price: '$199', 
+        priceNote: 'per month (Unlimited Students)', 
+        color: '#7C3AED', 
+        lightColor: '#EDE9FE', 
+        borderColor: '#C4B5FD', 
+        icon: 'FilterVintageIcon',
+    },
 ];

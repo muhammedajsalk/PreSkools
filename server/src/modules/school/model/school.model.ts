@@ -7,7 +7,8 @@ export interface ISchool extends Document {
   email: string;
   logo_url?: string;
   subscription_plan: "SEED" | "SPROUT" | "BLOOM";
-  subscription_status: "ACTIVE" | "INACTIVE" | "PAST_DUE";
+  subscription_status: 'ACTIVE' | 'TRIAL' | 'PAST_DUE' | 'CANCELED';
+  plan_start_date: Date;
   admin_id: mongoose.Types.ObjectId; 
   createdAt: Date;
   updatedAt: Date;
@@ -20,15 +21,20 @@ const SchoolSchema: Schema = new Schema(
     phone: { type: String, required: true },
     email: { type: String, required: true },
     logo_url: { type: String },
-    subscription_plan: {
-      type: String,
-      enum: ["SEED", "SPROUT", "BLOOM"],
-      default: "SEED",
+    subscription_plan: { 
+      type: String, 
+      enum: ['SEED', 'SPROUT', 'BLOOM'],
+      default: 'SEED',
+      required: true 
     },
     subscription_status: {
       type: String,
-      enum: ["ACTIVE", "INACTIVE", "PAST_DUE"],
-      default: "ACTIVE",
+      enum: ['ACTIVE', 'TRIAL', 'PAST_DUE', 'CANCELED'],
+      default: 'TRIAL', // Start all new schools in trial mode
+    },
+    plan_start_date: { 
+        type: Date, 
+        default: Date.now 
     },
     admin_id: { type: Schema.Types.ObjectId, ref: "User", required: true },
   },

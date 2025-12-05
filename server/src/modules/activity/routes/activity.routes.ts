@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createActivity, getClassHistory, getStudentFeed } from "../controller/activity.controller";
+import { createActivity, getClassHistory, getStudentFeed, getTodayOverview } from "../controller/activity.controller";
 import { protect, restrictTo } from "../../../middleware/auth";
 import validate from "../../../middleware/validate";
 import { createActivitySchema, getHistorySchema } from "../validation/activity.validation"
@@ -29,5 +29,11 @@ router.get(
   validate(getHistorySchema,"query"), // Validate query params
   getClassHistory
 );
+
+router.get(
+  '/overview',
+  restrictTo("TEACHER", "SCHOOL_ADMIN","PARENT"),
+  getTodayOverview
+)
 
 export default router;

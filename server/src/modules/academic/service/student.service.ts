@@ -30,7 +30,7 @@ export const createStudentService = async (schoolId: string, data: any) => {
       // Create Placeholder Parent User
       const [newParent] = await User.create([{
         name: data.parent_name,
-        phone: +data.parent_phone,
+        phone: `+${data.parent_phone}`,
         email: data.parent_email, // ✅ ADDED: Save Email to User Account
         role: "PARENT",
         school_id: schoolId,

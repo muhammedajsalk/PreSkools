@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { catchAsync } from "../../../middleware/catchAsync";
 import * as Service from "../service/activity.service";
+import { AppError } from "../../../utils/AppError";
 
 export const createActivity = catchAsync(async (req: Request, res: Response) => {
   const result = await Service.batchCreateActivityService({
@@ -40,4 +41,23 @@ export const getClassHistory = catchAsync(async (req: Request, res: Response) =>
     count: data.length,
     data,
   });
+});
+
+
+export const getTodayOverview = catchAsync(async (req: Request, res: Response) => {
+
+  console.log("hello")
+    // Student ID comes from the query string sent by the frontend
+    const studentId = req.query.studentId;
+
+    if (!studentId) {
+        throw new AppError("Student ID is required", 400);
+    }
+
+    const overview = await Service.getTodayOverviewService(
+        studentId as string,
+        req.user!.school_id!
+    );
+
+    res.status(200).json({ success: true, data: overview });
 });

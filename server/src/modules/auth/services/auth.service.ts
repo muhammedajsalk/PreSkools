@@ -7,6 +7,8 @@ export const loginService = async (token: string, stepTwoPassword?: string) => {
   const decodedToken = await admin.auth().verifyIdToken(token);
   const { uid, phone_number } = decodedToken;
 
+  console.log(phone_number)
+
   let user = await User.findOne({ firebase_uid: uid }).select("+password") as IUser;
 
   if (!user && phone_number) {

@@ -12,6 +12,8 @@ export interface IAttendance extends Document {
   date: Date;
   recorded_by: mongoose.Types.ObjectId; 
   records: IAttendanceRecord[];
+  createdAt: Date; 
+  updatedAt: Date;
 }
 
 const AttendanceSchema = new Schema<IAttendance>(

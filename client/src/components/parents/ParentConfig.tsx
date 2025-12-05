@@ -157,8 +157,8 @@ export const MOCK_TODAY_OVERVIEW: TodayOverview = {
 
 export const MOCK_QUICK_STATS: QuickStat[] = [
   { id: 'qs1', label: 'Photos Today', value: '8', icon: <PhotoCamera />, color: COLORS.pink, bgColor: COLORS.pinkLight },
-  { id: 'qs2', label: 'Activities', value: '4/6', icon: <DirectionsRun />, color: COLORS.success, bgColor: COLORS.successLight },
-  { id: 'qs3', label: 'Meals', value: '2/3', icon: <LocalDining />, color: COLORS.secondary, bgColor: COLORS.secondaryLight },
+  { id: 'qs2', label: 'Activities', value: '4', icon: <DirectionsRun />, color: COLORS.success, bgColor: COLORS.successLight },
+  { id: 'qs3', label: 'Meals', value: '2', icon: <LocalDining />, color: COLORS.secondary, bgColor: COLORS.secondaryLight },
   // Fixed: Now includes color and bgColor
   { id: 'qs4', label: 'Nap Time', value: '1h 30m', icon: <Bedtime />, color: COLORS.info, bgColor: COLORS.infoLight },
 ];
@@ -201,4 +201,35 @@ export const getActivityTypeConfig = (type: string) => {
     health: { color: COLORS.error, bgColor: COLORS.errorLight, icon: <Vaccines />, label: 'Health' },
   };
   return configs[type] || configs.activity;
+};
+
+export const getMealQuantityConfig = (quantity: string) => {
+  const configs: Record<string, { label: string; emoji: string; color: string; progress: number }> = {
+    all: { label: 'Ate Everything! 🎉', emoji: '🎉', color: COLORS.success, progress: 100 },
+    extra: { label: 'Had Extra!', emoji: '🌟', color: COLORS.success, progress: 100 },
+    half: { label: 'Ate Half', emoji: '👍', color: COLORS.warning, progress: 50 },
+    none: { label: "Didn't Eat", emoji: '😕', color: COLORS.error, progress: 5 },
+  };
+  // Ensure default handles case mismatch gracefully
+  return configs[quantity.toLowerCase()] || configs.half; 
+};
+
+export const getNapQualityConfig = (quality: string) => {
+  const configs: Record<string, { label: string; emoji: string; color: string }> = {
+    good: { label: 'Slept Well 😴', emoji: '😴', color: COLORS.success },
+    restless: { label: 'Restless 😣', emoji: '😣', color: COLORS.warning },
+    refused: { label: "Didn't Sleep 🙅", emoji: '🙅', color: COLORS.error },
+  };
+  return configs[quality.toLowerCase()] || configs.good;
+};
+
+// Utility to get label for meal type (Breakfast, Lunch, Snack, Dinner)
+export const getMealTypeConfig = (mealType: string) => {
+    const configs: Record<string, { label: string; icon: string; color: string }> = {
+        breakfast: { label: 'Breakfast', icon: '☀️', color: COLORS.info },
+        lunch: { label: 'Lunch', icon: '🍎', color: COLORS.primary },
+        snack: { label: 'Snack', icon: '🍪', color: COLORS.secondary },
+        dinner: { label: 'Dinner', icon: '🌙', color: COLORS.purple },
+    };
+    return configs[mealType.toLowerCase()] || configs.lunch;
 };

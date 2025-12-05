@@ -40,11 +40,20 @@ export const activityApiSlice = apiSlice.injectEndpoints({
       providesTags: ['Activity'], 
     }),
 
+    getTodayOverview: builder.query({
+      query: (studentId) => ({
+        url: `/activity/overview`,
+        params: { studentId }
+      }),
+      providesTags: ['Activity', 'Attendance'],
+    }),
+
   }),
 });
 
 export const { 
   useCreateActivityMutation,
   useGetStudentFeedQuery ,
-  useGetClassHistoryQuery
+  useGetClassHistoryQuery,
+  useGetTodayOverviewQuery
 } = activityApiSlice;

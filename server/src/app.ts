@@ -14,6 +14,7 @@ import attendanceRoutes from "./modules/attendance/routes/attendance.routes";
 import activityRoutes from "./modules/activity/routes/activity.routes";
 import uploadRoutes from "./modules/upload/router/upload.routes";
 import parentRoutes from './modules/parent/routes/parent.routes'
+import monitorRoutes from './modules/monitor/routes/monitor.routes'
 
 
 const app: Application = express();
@@ -33,6 +34,7 @@ app.use("/api/attendance", attendanceRoutes);
 app.use("/api/activity", activityRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/parent", parentRoutes);
+app.use("api/monitor",monitorRoutes)
 
 
 app.all("*", (req, res, next) => {

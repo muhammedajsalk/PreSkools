@@ -15,6 +15,7 @@ import activityRoutes from "./modules/activity/routes/activity.routes";
 import uploadRoutes from "./modules/upload/router/upload.routes";
 import parentRoutes from './modules/parent/routes/parent.routes'
 import monitorRoutes from './modules/monitor/routes/monitor.routes'
+import { apiTracker } from "./middleware/apiTracker";
 
 
 const app: Application = express();
@@ -24,6 +25,7 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(logger); 
+app.use(apiTracker);
 app.use("/api", apiLimiter); 
 app.use("/api/auth",authRoute)
 app.use("/api/school",schoolRoute)
@@ -34,7 +36,7 @@ app.use("/api/attendance", attendanceRoutes);
 app.use("/api/activity", activityRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/parent", parentRoutes);
-app.use("api/monitor",monitorRoutes)
+app.use("/api/monitor", monitorRoutes);
 
 
 app.all("*", (req, res, next) => {

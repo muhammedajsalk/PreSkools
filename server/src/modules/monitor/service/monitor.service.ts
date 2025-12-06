@@ -1,6 +1,7 @@
 import os from "os"; // Node.js built-in module for OS info
 import mongoose from "mongoose";
 import { AppError } from "../../../utils/AppError";
+import { GLOBAL_API_METRICS } from "../../../utils/globalMetrics";
 
 // Placeholder for future logic that tracks API requests/errors (e.g., using Redis or an actual log model)
 let apiCallMetrics = {
@@ -16,67 +17,80 @@ export const getSystemMetricsService = async (schoolId: string) => {
     const usedMemory = totalMemory - freeMemory;
     const cpuUsage = os.loadavg()[0]; // Average load over 1 minute
     
-    // Convert bytes to MB/GB and calculate percentage
-    const memoryPercent = Math.round((usedMemory / totalMemory) * 100);
+    // Calculate Memory in MB
     const memoryUsageMB = Math.round(usedMemory / (1024 * 1024));
+    const memoryTotalMB = Math.round(totalMemory / (1024 * 1024));
+    const memoryPercent = Math.round((usedMemory / totalMemory) * 100);
 
     // --- 2. DATABASE HEALTH (MongoDB) ---
     let dbResponseTimeMs = 'N/A';
-    let dbConnectionPool = 'N/A';
+    let dbConnectionPool = '0';
     
-    // Check if the readyState is 1 (CONNECTED)
     const isConnected = mongoose.connection.readyState === 1; 
 
     if (isConnected) {
         try {
-            // FIX: Use non-null assertion '!' to tell TypeScript that 'db' is defined here
+            // Check connection time and status
             const startTime = Date.now();
-            await mongoose.connection.db!.admin().ping(); // <-- FIX APPLIED
+            await mongoose.connection.db!.admin().ping();
             dbResponseTimeMs = `${Date.now() - startTime}ms`;
-            
-            // Connection Pool size check
             dbConnectionPool = mongoose.connection.readyState.toString(); 
         } catch (error) {
             console.error("DB Ping Failed:", error);
             dbResponseTimeMs = 'DOWN';
         }
     } else {
-        dbResponseTimeMs = 'DOWN'; // Set status to down if not connected
-        dbConnectionPool = '0';
+        dbResponseTimeMs = 'DOWN'; 
     }
 
-    // --- 3. SYNTHESIS ---
-    
+    // --- 3. API METRICS (REAL-TIME COUNTERS) ---
+    const totalCalls = GLOBAL_API_METRICS.totalRequests;
+    const errorCount = GLOBAL_API_METRICS.errorResponses;
+    const successCount = GLOBAL_API_METRICS.successResponses;
+
     // Calculate Error Ratios
-    const errorRatio = apiCallMetrics.total > 0 
-        ? Math.round((apiCallMetrics.errors / apiCallMetrics.total) * 1000) / 10 
+    const errorRatio = totalCalls > 0 
+        ? Math.round((errorCount / totalCalls) * 1000) / 10 // Convert to percentage, e.g., 2.5%
         : 0;
 
     return {
+        lastUpdated: new Date().toISOString(), // Current time for frontend display
+        
         // Server Stats
         server: {
-            cpuLoad: `${cpuUsage.toFixed(2)}%`,
-            memoryUsed: `${memoryUsageMB}MB`,
-            memoryPercent,
-            uptime: process.uptime(), // Seconds since server started
+            cpuUsage: cpuUsage, // Number (1-minute load average)
+            memoryUsed: memoryUsageMB, // MB
+            memoryTotal: memoryTotalMB, // MB
+            memoryPercent, // Percentage
+            uptime: process.uptime(), // Seconds
+            // Mock other required fields if needed by the frontend
+            platform: os.platform(),
+            nodeVersion: process.version,
         },
         
-        // API Stats (MOCKING historical/error data based on future logging)
+        // API Stats (REAL-TIME COUNTS)
         api: {
-            totalCalls: apiCallMetrics.total,
-            errorCount: apiCallMetrics.errors,
-            successRatio: 100 - errorRatio,
+            totalCalls: totalCalls,
+            successCount: successCount,
+            errorCount: errorCount,
             errorRatio: errorRatio,
+            errors5xx: GLOBAL_API_METRICS.errors5xx, // Read from global store
+            errors4xx: GLOBAL_API_METRICS.errors4xx,
+            
+            // Mocked/calculated performance data
+            avgResponseTime: 85, 
+            requestsPerMinute: 60,
         },
         
         // Database Stats
         database: {
-            status: dbResponseTimeMs === 'DOWN' ? 'DOWN' : 'UP',
+            connectionStatus: dbResponseTimeMs === 'DOWN' ? 'DOWN' : 'UP',
             responseTime: dbResponseTimeMs,
-            connectionStatus: dbConnectionPool,
+            poolStatus: { active: 5, idle: 10, total: 20, waiting: 0 }, // Mock Pool Status
+            dbName: mongoose.connection.db?.databaseName || 'N/A',
+            dbVersion: '5.0+', 
         },
         
-        // Mocked performance data for frontend charts (e.g., last 24 hours)
-        errorTimeline: [ /* Array of errors over time */ ]
+        errorTimeline: [],
     };
 };

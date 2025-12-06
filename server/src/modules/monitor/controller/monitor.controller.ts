@@ -8,6 +8,8 @@ import * as Service from "../service/monitor.service";
 export const getSystemHealth = catchAsync(async (req: Request, res: Response) => {
     // Note: We don't need schoolId here, but we pass it for context
     const metrics = await Service.getSystemMetricsService(req.user!.school_id!); 
+
+    console.log(metrics)
     
     res.status(200).json({
         success: true,
